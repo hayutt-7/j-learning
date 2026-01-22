@@ -11,15 +11,15 @@ export function Providers({ children }: { children: ReactNode }) {
         setMounted(true);
     }, []);
 
-    if (!mounted) {
-        return <>{children}</>;
-    }
-
     return (
         <AuthProvider>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-                {children}
-            </ThemeProvider>
+            {mounted ? (
+                <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+                    {children}
+                </ThemeProvider>
+            ) : (
+                <>{children}</>
+            )}
         </AuthProvider>
     );
 }
