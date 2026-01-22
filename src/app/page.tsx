@@ -7,6 +7,7 @@ import { InputArea } from '@/components/Translator/InputArea';
 import { ResultArea } from '@/components/Translator/ResultArea';
 import { AnalysisList } from '@/components/Learning/AnalysisList';
 import { VocabStudy } from '@/components/Vocab/VocabStudy';
+import { StatsPage } from '@/components/Stats/StatsPage';
 
 import { AnalysisResult } from '@/lib/types';
 import { translateAndAnalyze } from './actions';
@@ -114,9 +115,7 @@ export default function Home() {
       )}
 
       {currentView === 'stats' && (
-        <div className="flex items-center justify-center min-h-[60vh] text-center text-gray-500">
-          <p>통계 페이지 준비 중입니다...</p>
-        </div>
+        <StatsPage />
       )}
     </AppShell>
   );

@@ -1,33 +1,13 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { JLPTLevel, LearningItem } from '@/lib/types';
 import { LevelSelector } from './LevelSelector';
 import { VocabCard } from './VocabCard';
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Trophy, X, Zap } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Trophy, X, Zap, BookX, Flame } from 'lucide-react';
 import { useUserProgress, XP_TABLE } from '@/hooks/useUserProgress';
-
-// Mock data - in production this would come from API
-const MOCK_VOCAB_DB: Record<string, LearningItem[]> = {
-    'N5': [
-        { id: 'v1', text: '猫', reading: 'ねこ', meaning: '고양이', type: 'vocab', jlpt: 'N5', explanation: '' },
-        { id: 'v2', text: '犬', reading: 'いぬ', meaning: '개', type: 'vocab', jlpt: 'N5', explanation: '' },
-        { id: 'v3', text: '学生', reading: 'がくせい', meaning: '학생', type: 'vocab', jlpt: 'N5', explanation: '' },
-        { id: 'v4', text: '食べる', reading: 'たべる', meaning: '먹다', type: 'vocab', jlpt: 'N5', explanation: '' },
-        { id: 'v5', text: '広い', reading: 'ひろい', meaning: '넓다', type: 'vocab', jlpt: 'N5', explanation: '' },
-        { id: 'v6', text: '飲む', reading: 'のむ', meaning: '마시다', type: 'vocab', jlpt: 'N5', explanation: '' },
-        { id: 'v7', text: '先生', reading: 'せんせい', meaning: '선생님', type: 'vocab', jlpt: 'N5', explanation: '' },
-        { id: 'v8', text: '大きい', reading: 'おおきい', meaning: '크다', type: 'vocab', jlpt: 'N5', explanation: '' },
-    ],
-    'N4': [
-        { id: 'v10', text: '会議', reading: 'かいぎ', meaning: '회의', type: 'vocab', jlpt: 'N4', explanation: '' },
-        { id: 'v11', text: '届ける', reading: 'とどける', meaning: '전달하다', type: 'vocab', jlpt: 'N4', explanation: '' },
-        { id: 'v12', text: '経験', reading: 'けいけん', meaning: '경험', type: 'vocab', jlpt: 'N4', explanation: '' },
-    ],
-    'N3': [{ id: 'v20', text: '優勝', reading: 'ゆうしょう', meaning: '우승', type: 'vocab', jlpt: 'N3', explanation: '' }],
-    'N2': [{ id: 'v30', text: '際して', reading: 'さいして', meaning: '~에 즈음하여', type: 'vocab', jlpt: 'N2', explanation: '' }],
-    'N1': [{ id: 'v40', text: '疎通', reading: 'そつう', meaning: '소통', type: 'vocab', jlpt: 'N1', explanation: '' }],
-};
+import { useLearningHistory } from '@/hooks/useLearningHistory';
+import { VOCAB_DATABASE } from '@/lib/vocabDatabase';
 
 type CardStatus = 'know' | 'dont_know' | 'unseen';
 
@@ -51,7 +31,7 @@ export function VocabStudy() {
     const currentItem = cards[currentIndex];
 
     const startSession = useCallback((selected: JLPTLevel) => {
-        const pool = MOCK_VOCAB_DB[selected || 'N5'] || MOCK_VOCAB_DB['N5'];
+        const pool = VOCAB_DATABASE[selected || 'N5'] || VOCAB_DATABASE['N5'];
         // Shuffle the pool
         const shuffled = [...pool].sort(() => Math.random() - 0.5);
         setCards(shuffled);
@@ -186,12 +166,12 @@ export function VocabStudy() {
                             key={card.id}
                             onClick={() => setCurrentIndex(idx)}
                             className={`w-3 h-3 rounded-full transition-all ${idx === currentIndex
-                                    ? 'bg-indigo-600 scale-125'
-                                    : status === 'know'
-                                        ? 'bg-emerald-400'
-                                        : status === 'dont_know'
-                                            ? 'bg-red-400'
-                                            : 'bg-gray-200 dark:bg-gray-700'
+                                ? 'bg-indigo-600 scale-125'
+                                : status === 'know'
+                                    ? 'bg-emerald-400'
+                                    : status === 'dont_know'
+                                        ? 'bg-red-400'
+                                        : 'bg-gray-200 dark:bg-gray-700'
                                 }`}
                         />
                     );

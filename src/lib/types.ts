@@ -15,6 +15,7 @@ export interface LearningItem {
     explanation: string;
     nuance?: string;
     examples?: string[];
+    example?: string; // Single example sentence for vocab cards
     // New fields
     jlpt?: JLPTLevel;
     pitchAccent?: string; // e.g., "平板型 (Heiban)"
