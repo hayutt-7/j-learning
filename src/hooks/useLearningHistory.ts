@@ -37,6 +37,7 @@ export const useLearningHistory = create<LearningHistoryState>()(
                                     type: item.type,
                                     meaning: item.meaning,
                                     jlpt: item.jlpt,
+                                    reading: item.reading,
                                     exposureCount: 1,
                                     lastSeenAt: Date.now(),
                                     isMastered: false,

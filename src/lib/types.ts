@@ -31,6 +31,7 @@ export interface LearningHistoryItem {
     lastSeenAt: number;
     // New fields for history
     jlpt?: JLPTLevel;
+    reading?: string; // Stored furigana/reading
     // SRS fields (Spaced Repetition)
     easeFactor: number;      // Multiplier (default 2.5)
     interval: number;        // Days until next review
