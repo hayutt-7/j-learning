@@ -4,7 +4,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { JLPTLevel, LearningItem } from '@/lib/types';
 import { LevelSelector } from './LevelSelector';
 import { VocabCard } from './VocabCard';
-import { ArrowLeft, ChevronLeft, ChevronRight, Trophy, X, Zap, BookX, Flame } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Trophy, X, Zap, BookX, Flame, Settings, Eye, EyeOff, Filter } from 'lucide-react';
 import { useUserProgress, XP_TABLE } from '@/hooks/useUserProgress';
 import { useLearningHistory } from '@/hooks/useLearningHistory';
 import { VOCAB_DATABASE } from '@/lib/vocabDatabase';
@@ -27,6 +27,8 @@ export function VocabStudy() {
     const [showExitModal, setShowExitModal] = useState(false);
     const [wrongWordsOnly, setWrongWordsOnly] = useState(false);
     const [autoAdvance, setAutoAdvance] = useState(true);
+    const [showReading, setShowReading] = useState(true);
+    const [showSettings, setShowSettings] = useState(false);
 
     const { addXp, updateStreak } = useUserProgress();
 
@@ -142,14 +144,14 @@ export function VocabStudy() {
     return (
         <div className="flex flex-col items-center w-full max-w-lg mx-auto h-full py-6">
             {/* Header */}
-            <div className="flex items-center justify-between w-full mb-6 px-4">
+            <div className="flex items-center justify-between w-full mb-4 px-4">
                 <button
                     onClick={handleExit}
                     className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
                 >
                     <ArrowLeft className="w-6 h-6 text-gray-400" />
                 </button>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                     <span className="font-bold text-gray-900 dark:text-white px-3 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm shadow-sm">
                         {level} 단어장
                     </span>
@@ -157,11 +159,23 @@ export function VocabStudy() {
                         {currentIndex + 1} / {cards.length}
                     </span>
                 </div>
-                <div className="flex items-center gap-1.5 text-orange-500 font-bold">
-                    <Zap className="w-5 h-5" />
-                    <span>+{sessionStats.totalXp}</span>
+                <div className="flex items-center gap-2">
+                    <span className="text-orange-500 font-bold text-sm">+{sessionStats.totalXp}</span>
+                    <button
+                        onClick={() => setShowSettings(true)}
+                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
+                    >
+                        <Settings className="w-5 h-5 text-gray-400" />
+                    </button>
                 </div>
             </div>
+
+            {/* Wrong Words Filter Badge */}
+            {wrongWordsOnly && (
+                <div className="mb-3 px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-full text-xs font-bold flex items-center gap-1">
+                    <Filter className="w-3 h-3" /> 오답만 보기 모드
+                </div>
+            )}
 
             {/* Status Indicator */}
             {currentStatus && (
@@ -172,7 +186,7 @@ export function VocabStudy() {
 
             {/* Card */}
             {currentItem && (
-                <VocabCard item={currentItem} onResult={handleResult} />
+                <VocabCard item={currentItem} onResult={handleResult} showReading={showReading} />
             )}
 
             {/* Navigation */}
@@ -255,6 +269,64 @@ export function VocabStudy() {
                                 완료
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Settings Modal */}
+            {showSettings && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">학습 설정</h3>
+                            <button onClick={() => setShowSettings(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full">
+                                <X className="w-5 h-5 text-gray-400" />
+                            </button>
+                        </div>
+                        <div className="space-y-4">
+                            <label className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl cursor-pointer">
+                                <div className="flex items-center gap-3">
+                                    {showReading ? <Eye className="w-5 h-5 text-indigo-500" /> : <EyeOff className="w-5 h-5 text-gray-400" />}
+                                    <span className="font-medium text-gray-900 dark:text-white">발음(읽기) 표시</span>
+                                </div>
+                                <button
+                                    onClick={() => setShowReading(!showReading)}
+                                    className={`w-12 h-7 rounded-full transition-colors relative ${showReading ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                                >
+                                    <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-transform ${showReading ? 'left-6' : 'left-1'}`} />
+                                </button>
+                            </label>
+                            <label className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl cursor-pointer">
+                                <div className="flex items-center gap-3">
+                                    <ChevronRight className={`w-5 h-5 ${autoAdvance ? 'text-indigo-500' : 'text-gray-400'}`} />
+                                    <span className="font-medium text-gray-900 dark:text-white">자동 다음 카드</span>
+                                </div>
+                                <button
+                                    onClick={() => setAutoAdvance(!autoAdvance)}
+                                    className={`w-12 h-7 rounded-full transition-colors relative ${autoAdvance ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                                >
+                                    <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-transform ${autoAdvance ? 'left-6' : 'left-1'}`} />
+                                </button>
+                            </label>
+                            <label className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl cursor-pointer">
+                                <div className="flex items-center gap-3">
+                                    <Filter className={`w-5 h-5 ${wrongWordsOnly ? 'text-red-500' : 'text-gray-400'}`} />
+                                    <span className="font-medium text-gray-900 dark:text-white">오답만 보기</span>
+                                </div>
+                                <button
+                                    onClick={() => setWrongWordsOnly(!wrongWordsOnly)}
+                                    className={`w-12 h-7 rounded-full transition-colors relative ${wrongWordsOnly ? 'bg-red-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                                >
+                                    <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-transform ${wrongWordsOnly ? 'left-6' : 'left-1'}`} />
+                                </button>
+                            </label>
+                        </div>
+                        <button
+                            onClick={() => setShowSettings(false)}
+                            className="w-full mt-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700"
+                        >
+                            완료
+                        </button>
                     </div>
                 </div>
             )}

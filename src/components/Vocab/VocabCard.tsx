@@ -8,9 +8,10 @@ import { cn } from '@/lib/utils';
 interface VocabCardProps {
     item: LearningItem;
     onResult: (result: 'know' | 'dont_know') => void;
+    showReading?: boolean;
 }
 
-export function VocabCard({ item, onResult }: VocabCardProps) {
+export function VocabCard({ item, onResult, showReading = true }: VocabCardProps) {
     const [showAnswer, setShowAnswer] = useState(false);
     const [swipeOffset, setSwipeOffset] = useState(0);
     const touchStartX = useRef(0);
@@ -125,7 +126,7 @@ export function VocabCard({ item, onResult }: VocabCardProps) {
                         </h2>
                     ) : (
                         <div className="text-center w-full animate-in fade-in duration-200">
-                            {item.reading && (
+                            {showReading && item.reading && (
                                 <p className="text-2xl text-indigo-500 font-bold mb-2">{item.reading}</p>
                             )}
                             <h2 className="text-4xl font-black text-gray-900 dark:text-white mb-4">
