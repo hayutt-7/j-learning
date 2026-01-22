@@ -7,6 +7,7 @@ import { InputArea } from '@/components/Translator/InputArea';
 import { ResultArea } from '@/components/Translator/ResultArea';
 import { AnalysisList } from '@/components/Learning/AnalysisList';
 import { VocabStudy } from '@/components/Vocab/VocabStudy';
+import { SongStudy } from '@/components/Song/SongStudy';
 import { StatsPage } from '@/components/Stats/StatsPage';
 
 import { AnalysisResult } from '@/lib/types';
@@ -112,6 +113,10 @@ export default function Home() {
 
       {currentView === 'vocab' && (
         <VocabStudy />
+      )}
+
+      {currentView === 'song' && (
+        <SongStudy />
       )}
 
       {currentView === 'stats' && (

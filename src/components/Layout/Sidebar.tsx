@@ -1,10 +1,10 @@
 'use client';
 
-import { GraduationCap, Brain, Type, BarChart3, Settings, LogOut, LayoutDashboard } from 'lucide-react';
+import { GraduationCap, Brain, Type, BarChart3, Settings, LogOut, LayoutDashboard, Music } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 
-export type ViewMode = 'translate' | 'vocab' | 'dashboard' | 'stats';
+export type ViewMode = 'translate' | 'vocab' | 'song' | 'stats';
 
 interface SidebarProps {
     currentView: ViewMode;
@@ -18,6 +18,7 @@ export function Sidebar({ currentView, onViewChange, className }: SidebarProps) 
     const menuItems = [
         { id: 'translate', label: '작문/번역', icon: Type },
         { id: 'vocab', label: '단어 암기', icon: Brain },
+        { id: 'song', label: '노래 학습', icon: Music },
         { id: 'stats', label: '학습 통계', icon: BarChart3 },
     ];
 

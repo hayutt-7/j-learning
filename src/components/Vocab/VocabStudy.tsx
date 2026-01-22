@@ -25,6 +25,8 @@ export function VocabStudy() {
     const [cardStatuses, setCardStatuses] = useState<Map<string, CardStatus>>(new Map());
     const [sessionStats, setSessionStats] = useState<SessionStats>({ totalXp: 0, cardsStudied: 0, correctCount: 0, incorrectCount: 0 });
     const [showExitModal, setShowExitModal] = useState(false);
+    const [wrongWordsOnly, setWrongWordsOnly] = useState(false);
+    const [autoAdvance, setAutoAdvance] = useState(true);
 
     const { addXp, updateStreak } = useUserProgress();
 
@@ -68,7 +70,43 @@ export function VocabStudy() {
                 }));
             }
         }
+
+        // Auto advance to next card after short delay
+        if (autoAdvance && currentIndex < cards.length - 1) {
+            setTimeout(() => {
+                setCurrentIndex(prev => prev + 1);
+            }, 300);
+        }
     };
+
+    // Keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (showExitModal) return;
+
+            switch (e.key) {
+                case 'ArrowLeft':
+                    goPrev();
+                    break;
+                case 'ArrowRight':
+                    goNext();
+                    break;
+                case '1':
+                case 'x':
+                case 'X':
+                    if (currentItem) handleResult('dont_know');
+                    break;
+                case '2':
+                case 'o':
+                case 'O':
+                    if (currentItem) handleResult('know');
+                    break;
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [currentIndex, cards.length, showExitModal, currentItem]);
 
     const goNext = () => {
         if (currentIndex < cards.length - 1) {

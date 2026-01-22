@@ -58,6 +58,35 @@ export function VocabCard({ item, onResult }: VocabCardProps) {
         return 'border-gray-100 dark:border-gray-700';
     };
 
+    // Auto-play audio when answer is revealed
+    useEffect(() => {
+        if (showAnswer && item.text) {
+            // Small delay for better UX
+            const timer = setTimeout(() => {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(item.text);
+                    utterance.lang = 'ja-JP';
+                    utterance.rate = 0.8;
+                    window.speechSynthesis.speak(utterance);
+                }
+            }, 200);
+            return () => clearTimeout(timer);
+        }
+    }, [showAnswer, item.text]);
+
+    // Haptic feedback helper
+    const vibrate = () => {
+        if ('vibrate' in navigator) {
+            navigator.vibrate(30);
+        }
+    };
+
+    const handleAnswer = (result: 'know' | 'dont_know') => {
+        vibrate();
+        onResult(result);
+    };
+
     return (
         <div
             className="w-full max-w-sm mx-auto select-none"
@@ -119,13 +148,13 @@ export function VocabCard({ item, onResult }: VocabCardProps) {
                 {showAnswer && (
                     <div className="p-4 border-t border-gray-100 dark:border-gray-700 flex gap-4 animate-in fade-in duration-200">
                         <button
-                            onClick={() => onResult('dont_know')}
+                            onClick={() => handleAnswer('dont_know')}
                             className="flex-1 flex items-center justify-center py-5 rounded-2xl bg-red-500 text-white font-bold hover:bg-red-600 transition-all active:scale-95"
                         >
                             <X className="w-8 h-8" strokeWidth={3} />
                         </button>
                         <button
-                            onClick={() => onResult('know')}
+                            onClick={() => handleAnswer('know')}
                             className="flex-1 flex items-center justify-center py-5 rounded-2xl bg-emerald-500 text-white font-bold hover:bg-emerald-600 transition-all active:scale-95"
                         >
                             <Check className="w-8 h-8" strokeWidth={3} />
