@@ -34,12 +34,12 @@ export default function Home() {
 
   return (
     <AppShell>
-      <div className="space-y-8 relative">
-        <div className="space-y-2 text-center mb-10">
-          <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+      <div className="space-y-6 lg:space-y-8 relative">
+        <div className="space-y-2 text-center mb-6 lg:mb-10">
+          <h2 className="text-2xl lg:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
             일본어, 자연스럽게 익히세요
           </h2>
-          <p className="text-lg text-gray-500 dark:text-gray-400">
+          <p className="text-base lg:text-lg text-gray-500 dark:text-gray-400">
             하고 싶은 말을 한국어로 입력하면, AI가 자연스러운 일본어로 바꿔줍니다.
           </p>
         </div>

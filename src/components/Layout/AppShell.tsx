@@ -25,7 +25,7 @@ export function AppShell({ children }: AppShellProps) {
     const { user, loading: authLoading, signOut } = useAuth();
 
     // Check for due items for badge
-    const { getDueItems, history } = useLearningHistory();
+    const { getDueItems, history, syncWithSupabase } = useLearningHistory();
     const [dueCount, setDueCount] = useState(0);
 
     useEffect(() => {
@@ -33,19 +33,29 @@ export function AppShell({ children }: AppShellProps) {
         setMounted(true);
     }, [history, getDueItems]);
 
+    // Optimize: Sync with cloud when user logs in
+    useEffect(() => {
+        if (user) {
+            syncWithSupabase(user);
+        }
+    }, [user, syncWithSupabase]);
+
     return (
         <div className="min-h-screen bg-[#FDFDFD] dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans selection:bg-indigo-100 selection:text-indigo-900 transition-colors duration-300">
             <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 transition-colors duration-300">
-                <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
+                <div className="max-w-7xl mx-auto px-4 lg:px-6 h-16 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5 shrink-0">
                         <div className="bg-indigo-600 p-2 rounded-lg">
                             <GraduationCap className="h-5 w-5 text-white" />
                         </div>
-                        <h1 className="font-bold text-lg tracking-tight text-gray-900 dark:text-gray-100">
+                        <h1 className="font-bold text-lg tracking-tight text-gray-900 dark:text-gray-100 hidden sm:block">
                             J-Learning <span className="text-indigo-600 dark:text-indigo-400">Focus</span>
                         </h1>
+                        <h1 className="font-bold text-lg tracking-tight text-gray-900 dark:text-gray-100 sm:hidden">
+                            J<span className="text-indigo-600 dark:text-indigo-400">L</span>
+                        </h1>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar ml-2">
                         {mounted && (
                             <button
                                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -120,7 +130,7 @@ export function AppShell({ children }: AppShellProps) {
             <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} />
             <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
 
-            <main className="pt-24 pb-20 px-6">
+            <main className="pt-20 lg:pt-24 pb-20 px-4 lg:px-6">
                 <div className="max-w-7xl mx-auto">
                     {children}
                 </div>

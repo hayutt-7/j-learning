@@ -14,6 +14,7 @@ interface LearningHistoryState {
     toggleMastery: (itemId: string) => void; // Legacy manual override
     isMastered: (itemId: string) => boolean;
     shouldHide: (itemId: string) => boolean;
+    syncWithSupabase: (user: any) => Promise<void>;
 }
 
 export const useLearningHistory = create<LearningHistoryState>()(
@@ -148,6 +149,80 @@ export const useLearningHistory = create<LearningHistoryState>()(
                 // Hide if mastered OR exposed 3+ times
                 return item.isMastered || item.exposureCount >= 3;
             },
+
+            syncWithSupabase: async (user: any) => { // User type explicit import avoided to reduce dependency complexity for now or use generic
+                if (!user) return;
+
+                const { supabase } = await import('@/lib/supabase');
+                const localHistory = get().history;
+
+                // 1. Pull remote data
+                const { data: remoteLogs, error } = await supabase
+                    .from('study_logs')
+                    .select('*')
+                    .eq('user_id', user.id);
+
+                if (error) {
+                    console.error('Failed to pull study logs:', error);
+                    return;
+                }
+
+                const mergedHistory: LearningHistoryMap = { ...localHistory };
+                const itemsToPush: any[] = [];
+
+                // 2. Merge Remote -> Local
+                const remoteMap: Record<string, any> = {};
+                remoteLogs?.forEach(log => {
+                    remoteMap[log.item_id] = log;
+                    const localItem = localHistory[log.item_id];
+                    const remoteItem = log.data as LearningHistoryItem;
+
+                    if (!localItem) {
+                        // New from remote
+                        mergedHistory[log.item_id] = remoteItem;
+                    } else {
+                        // Conflict resolution: Last Seen wins
+                        if (remoteItem.lastSeenAt > localItem.lastSeenAt) {
+                            mergedHistory[log.item_id] = remoteItem;
+                        } else if (localItem.lastSeenAt > remoteItem.lastSeenAt) {
+                            // Local is newer, needs push
+                            itemsToPush.push({
+                                user_id: user.id,
+                                item_id: localItem.itemId,
+                                data: localItem,
+                                last_seen_at: localItem.lastSeenAt,
+                                updated_at: new Date().toISOString()
+                            });
+                        }
+                    }
+                });
+
+                // 3. Identify Local -> Remote (New items)
+                Object.values(localHistory).forEach(item => {
+                    if (!remoteMap[item.itemId]) {
+                        itemsToPush.push({
+                            user_id: user.id,
+                            item_id: item.itemId,
+                            data: item,
+                            last_seen_at: item.lastSeenAt,
+                            updated_at: new Date().toISOString()
+                        });
+                    }
+                });
+
+                // 4. Update Local State
+                set({ history: mergedHistory });
+
+                // 5. Push updates to Supabase
+                if (itemsToPush.length > 0) {
+                    // Batch upsert
+                    const { error: pushError } = await supabase
+                        .from('study_logs')
+                        .upsert(itemsToPush, { onConflict: 'user_id, item_id' });
+
+                    if (pushError) console.error('Failed to push updates:', pushError);
+                }
+            }
         }),
         {
             name: 'j-learning-history',

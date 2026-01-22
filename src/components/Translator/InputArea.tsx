@@ -25,12 +25,12 @@ export function InputArea({ onTranslate, isLoading }: InputAreaProps) {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => {
-                        if (e.key === 'Enter' && e.altKey) {
+                        if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
                             handleSubmit(e);
                         }
                     }}
-                    placeholder="말하고 싶은 내용을 한국어로 입력하세요... (Alt+Enter로 전송)"
+                    placeholder="말하고 싶은 내용을 한국어로 입력하세요... (Enter로 전송, Shift+Enter로 줄바꿈)"
                     className="block w-full resize-none border-0 bg-transparent py-4 pl-4 pr-12 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:ring-0 sm:text-lg sm:leading-7 h-32"
                     disabled={isLoading}
                 />
