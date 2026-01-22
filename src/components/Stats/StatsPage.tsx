@@ -2,6 +2,7 @@
 
 import { useLearningHistory } from '@/hooks/useLearningHistory';
 import { useUserProgress } from '@/hooks/useUserProgress';
+import { Leaderboard } from '@/components/Social/Leaderboard';
 import { Trophy, TrendingUp, Calendar, Activity, Zap, Flame } from 'lucide-react';
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -96,7 +97,7 @@ export function StatsPage() {
             </div>
 
             {/* JLPT Breakdown */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm mb-8">
                 <h3 className="font-bold text-gray-900 dark:text-white mb-6 text-lg">JLPT 레벨별 학습량</h3>
                 <div className="space-y-4">
                     {(['N5', 'N4', 'N3', 'N2', 'N1'] as const).map(lvl => {
@@ -123,6 +124,11 @@ export function StatsPage() {
                         );
                     })}
                 </div>
+            </div>
+
+            {/* Leaderboard Section */}
+            <div className="mb-8">
+                <Leaderboard />
             </div>
         </div>
     );
