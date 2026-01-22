@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { LearningItem } from '@/lib/types';
-import { Volume2, Check, X } from 'lucide-react';
+import { Volume2, Check, X, Sparkles, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface VocabCardProps {
@@ -14,13 +14,36 @@ interface VocabCardProps {
 export function VocabCard({ item, onResult, showReading = true }: VocabCardProps) {
     const [showAnswer, setShowAnswer] = useState(false);
     const [swipeOffset, setSwipeOffset] = useState(0);
+    const [generatedExample, setGeneratedExample] = useState('');
+    const [isGenerating, setIsGenerating] = useState(false);
     const touchStartX = useRef(0);
 
     // Reset when item changes
     useEffect(() => {
         setShowAnswer(false);
         setSwipeOffset(0);
+        setGeneratedExample('');
+        setIsGenerating(false);
     }, [item.id]);
+
+    const generateExample = async () => {
+        setIsGenerating(true);
+        try {
+            const res = await fetch('/api/example', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ word: item.text, meaning: item.meaning }),
+            });
+            const data = await res.json();
+            if (data.sentence) {
+                setGeneratedExample(data.sentence);
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setIsGenerating(false);
+        }
+    };
 
     const playAudio = (text: string, e?: React.MouseEvent) => {
         e?.stopPropagation();
@@ -135,10 +158,37 @@ export function VocabCard({ item, onResult, showReading = true }: VocabCardProps
                             <p className="text-2xl font-bold text-gray-600 dark:text-gray-300 break-keep">
                                 {item.meaning}
                             </p>
-                            {item.example && (
+                            {item.example ? (
                                 <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-xl text-left">
                                     <p className="text-xs text-gray-400 font-bold mb-1">예문</p>
                                     <p className="text-sm text-gray-700 dark:text-gray-300">{item.example}</p>
+                                </div>
+                            ) : (
+                                <div className="mt-6">
+                                    {generatedExample ? (
+                                        <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-left animate-in fade-in zoom-in-95 duration-200">
+                                            <p className="text-xs text-indigo-400 font-bold mb-1 flex items-center gap-1">
+                                                <Sparkles className="w-3 h-3" /> AI 예문
+                                            </p>
+                                            <p className="text-sm text-gray-700 dark:text-gray-300">{generatedExample}</p>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                generateExample();
+                                            }}
+                                            disabled={isGenerating}
+                                            className="w-full py-3 border-2 border-dashed border-gray-200 dark:border-gray-700 text-gray-400 font-bold rounded-xl hover:border-indigo-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            {isGenerating ? (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : (
+                                                <Sparkles className="w-4 h-4" />
+                                            )}
+                                            {isGenerating ? 'AI가 예문 만드는 중...' : 'AI 예문 생성하기'}
+                                        </button>
+                                    )}
                                 </div>
                             )}
                         </div>
