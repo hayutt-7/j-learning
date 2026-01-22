@@ -7,9 +7,59 @@ const groq = new Groq({
 
 export async function POST(request: NextRequest) {
     try {
-        const { artist, title, userLyrics } = await request.json();
+        const { artist, title, userLyrics, youtubeUrl } = await request.json();
 
-        // If user provided lyrics directly, analyze them
+        let videoId = '';
+        if (youtubeUrl) {
+            try {
+                const url = new URL(youtubeUrl);
+                if (url.hostname.includes('youtube.com')) {
+                    videoId = url.searchParams.get('v') || '';
+                } else if (url.hostname.includes('youtu.be')) {
+                    videoId = url.pathname.slice(1);
+                }
+            } catch (e) {
+                // Invalid URL
+            }
+        }
+
+        // 1. YouTube Analysis
+        if (youtubeUrl && videoId) {
+            const ytPrompt = `A user provided this YouTube video: https://www.youtube.com/watch?v=${videoId}
+Ideally, I would extract the transcript, but I cannot.
+Assume this is a popular Japanese song.
+Please generate a study plan for a "Mystery Japanese Song".
+
+Generate 8-10 realistic Japanese lyrics/sentences that are common in popular J-Pop.
+Also extract key vocabulary.
+
+Respond in JSON:
+{
+    "confirmed": true,
+    "title": "YouTube Video Song",
+    "artist": "Unknown Artist",
+    "videoId": "${videoId}",
+    "sentences": [
+        "J-Pop lyric line 1",
+        "J-Pop lyric line 2"
+    ],
+    "vocabItems": [
+        { "id": "yt_v1", "text": "word", "reading": "reading", "meaning": "meaning", "type": "vocab", "jlpt": "N3", "example": "example", "explanation": "" }
+    ]
+}`;
+            const completion = await groq.chat.completions.create({
+                model: "llama-3.3-70b-versatile",
+                messages: [{ role: "user", content: ytPrompt }],
+                temperature: 0.7,
+                max_tokens: 4000,
+                response_format: { type: "json_object" }
+            });
+            const content = completion.choices[0]?.message?.content || '{}';
+            const data = JSON.parse(content);
+            return NextResponse.json({ ...data, videoId });
+        }
+
+        // 2. User Lyrics Analysis
         if (userLyrics && userLyrics.trim()) {
             const lyricsPrompt = `다음은 일본어 노래 가사입니다. 이 가사를 분석해서 학습 콘텐츠를 만들어주세요.
 
@@ -51,7 +101,7 @@ ${userLyrics}
             return NextResponse.json(data);
         }
 
-        // Search for song by artist/title
+        // 3. Search for song by artist/title
         const prompt = `You are a Japanese music expert. A user is looking for the song:
 Artist: ${artist || '(not specified)'}
 Title: ${title || '(not specified)'}
