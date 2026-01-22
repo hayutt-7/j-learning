@@ -177,13 +177,6 @@ export function VocabStudy() {
                 </div>
             )}
 
-            {/* Status Indicator */}
-            {currentStatus && (
-                <div className={`mb-4 px-4 py-2 rounded-full text-sm font-bold ${currentStatus === 'know' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500'}`}>
-                    {currentStatus === 'know' ? '✓ 알아요' : '✗ 몰라요'}
-                </div>
-            )}
-
             {/* Card */}
             {currentItem && (
                 <VocabCard item={currentItem} onResult={handleResult} showReading={showReading} />

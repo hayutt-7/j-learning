@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Music, Search, Loader2, BookOpen, ListMusic, ArrowLeft } from 'lucide-react';
+import { Music, Search, Loader2, BookOpen, ListMusic, ArrowLeft, FileText, AlertCircle } from 'lucide-react';
 import { LearningItem } from '@/lib/types';
 import { VocabCard } from '../Vocab/VocabCard';
 
@@ -14,11 +14,14 @@ interface SongInfo {
 }
 
 type StudyMode = 'search' | 'select' | 'sentence' | 'vocab';
+type InputMode = 'search' | 'paste';
 
 export function SongStudy() {
     const [mode, setMode] = useState<StudyMode>('search');
+    const [inputMode, setInputMode] = useState<InputMode>('search');
     const [artist, setArtist] = useState('');
     const [title, setTitle] = useState('');
+    const [userLyrics, setUserLyrics] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [songInfo, setSongInfo] = useState<SongInfo | null>(null);
     const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
@@ -26,8 +29,12 @@ export function SongStudy() {
     const [error, setError] = useState('');
 
     const searchSong = async () => {
-        if (!artist.trim() && !title.trim()) {
+        if (inputMode === 'search' && !artist.trim() && !title.trim()) {
             setError('가수명 또는 노래 제목을 입력해주세요.');
+            return;
+        }
+        if (inputMode === 'paste' && !userLyrics.trim()) {
+            setError('가사를 입력해주세요.');
             return;
         }
         setIsLoading(true);
@@ -37,12 +44,20 @@ export function SongStudy() {
             const response = await fetch('/api/song', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ artist: artist.trim(), title: title.trim() }),
+                body: JSON.stringify({
+                    artist: artist.trim(),
+                    title: title.trim(),
+                    userLyrics: inputMode === 'paste' ? userLyrics.trim() : undefined
+                }),
             });
 
-            if (!response.ok) throw new Error('노래를 찾을 수 없습니다.');
-
             const data = await response.json();
+
+            if (!data.sentences || data.sentences.length === 0) {
+                setError('콘텐츠를 생성할 수 없습니다. 다시 시도해주세요.');
+                return;
+            }
+
             setSongInfo(data);
             setMode('select');
         } catch (err) {
@@ -57,46 +72,79 @@ export function SongStudy() {
         if (currentVocabIndex < songInfo.vocabItems.length - 1) {
             setCurrentVocabIndex(prev => prev + 1);
         } else {
-            setMode('select'); // Return to mode selection
+            setMode('select');
         }
     };
 
     if (mode === 'search') {
         return (
-            <div className="max-w-md mx-auto py-10 px-4">
-                <div className="text-center mb-10">
-                    <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
-                        <Music className="w-10 h-10 text-white" />
+            <div className="max-w-md mx-auto py-8 px-4">
+                <div className="text-center mb-8">
+                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <Music className="w-8 h-8 text-white" />
                     </div>
-                    <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2">노래로 배우기</h1>
-                    <p className="text-gray-500">좋아하는 일본 노래로 문법과 단어를 학습하세요</p>
+                    <h1 className="text-2xl font-black text-gray-900 dark:text-white mb-1">노래로 배우기</h1>
+                    <p className="text-gray-500 text-sm">좋아하는 일본 노래로 문법과 단어를 학습하세요</p>
+                </div>
+
+                {/* Input Mode Toggle */}
+                <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1 mb-6">
+                    <button
+                        onClick={() => setInputMode('search')}
+                        className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${inputMode === 'search' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow' : 'text-gray-500'}`}
+                    >
+                        <Search className="w-4 h-4 inline mr-1.5" />노래 검색
+                    </button>
+                    <button
+                        onClick={() => setInputMode('paste')}
+                        className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${inputMode === 'paste' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow' : 'text-gray-500'}`}
+                    >
+                        <FileText className="w-4 h-4 inline mr-1.5" />가사 붙여넣기
+                    </button>
                 </div>
 
                 <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-bold text-gray-500 mb-2">가수명</label>
-                        <input
-                            type="text"
-                            value={artist}
-                            onChange={(e) => setArtist(e.target.value)}
-                            placeholder="예: YOASOBI, Kenshi Yonezu..."
-                            className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-purple-500 focus:outline-none transition-colors"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-bold text-gray-500 mb-2">노래 제목</label>
-                        <input
-                            type="text"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            placeholder="예: 夜に駆ける, Lemon..."
-                            className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-purple-500 focus:outline-none transition-colors"
-                            onKeyDown={(e) => e.key === 'Enter' && searchSong()}
-                        />
-                    </div>
+                    {inputMode === 'search' ? (
+                        <>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-400 mb-1.5">가수명</label>
+                                <input
+                                    type="text"
+                                    value={artist}
+                                    onChange={(e) => setArtist(e.target.value)}
+                                    placeholder="예: YOASOBI, 米津玄師..."
+                                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-purple-500 focus:outline-none"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-400 mb-1.5">노래 제목</label>
+                                <input
+                                    type="text"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    placeholder="예: 夜に駆ける, Lemon..."
+                                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-purple-500 focus:outline-none"
+                                    onKeyDown={(e) => e.key === 'Enter' && searchSong()}
+                                />
+                            </div>
+                        </>
+                    ) : (
+                        <div>
+                            <label className="block text-xs font-bold text-gray-400 mb-1.5">일본어 가사 (복사해서 붙여넣기)</label>
+                            <textarea
+                                value={userLyrics}
+                                onChange={(e) => setUserLyrics(e.target.value)}
+                                placeholder="여기에 일본어 가사를 붙여넣으세요...&#10;&#10;예:&#10;夜に駆ける&#10;沈むように溶けてゆくように"
+                                className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-purple-500 focus:outline-none h-40 resize-none"
+                            />
+                            <p className="text-xs text-gray-400 mt-1">💡 YouTube 가사 자막이나 가사 사이트에서 복사해주세요</p>
+                        </div>
+                    )}
 
                     {error && (
-                        <p className="text-red-500 text-sm font-medium text-center">{error}</p>
+                        <div className="flex items-center gap-2 text-red-500 text-sm font-medium bg-red-50 dark:bg-red-900/20 p-3 rounded-xl">
+                            <AlertCircle className="w-4 h-4" />{error}
+                        </div>
                     )}
 
                     <button
@@ -105,9 +153,9 @@ export function SongStudy() {
                         className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-2xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg"
                     >
                         {isLoading ? (
-                            <><Loader2 className="w-5 h-5 animate-spin" /> 검색 중...</>
+                            <><Loader2 className="w-5 h-5 animate-spin" /> 분석 중...</>
                         ) : (
-                            <><Search className="w-5 h-5" /> 노래 찾기</>
+                            <><Search className="w-5 h-5" /> {inputMode === 'paste' ? '가사 분석하기' : '노래 찾기'}</>
                         )}
                     </button>
                 </div>
