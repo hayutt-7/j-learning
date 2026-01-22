@@ -39,6 +39,7 @@ export function SongStudy() {
         }
         setIsLoading(true);
         setError('');
+        setSongInfo(null); // Clear previous results immediately
 
         try {
             const response = await fetch('/api/song', {

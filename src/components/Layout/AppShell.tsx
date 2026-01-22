@@ -6,6 +6,7 @@ import { StatsModal } from '../Stats/StatsModal';
 import { AuthModal } from '../Auth/AuthModal';
 import { useLearningHistory } from '@/hooks/useLearningHistory';
 import { useAuth } from '@/hooks/useAuth';
+import { UserSync } from '../Social/UserSync';
 import { useTheme } from 'next-themes';
 import { Sidebar, ViewMode } from './Sidebar';
 import { MobileNav } from './MobileNav';
@@ -44,6 +45,7 @@ export function AppShell({ children, currentView = 'translate', onViewChange = (
 
     return (
         <div className="flex min-h-screen bg-[#FDFDFD] dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans selection:bg-indigo-100 selection:text-indigo-900 transition-colors duration-300">
+            <UserSync />
 
             {/* Desktop Sidebar */}
             <div className="hidden lg:block fixed inset-y-0 left-0 z-50">

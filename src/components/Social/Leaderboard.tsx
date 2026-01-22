@@ -45,17 +45,76 @@ export function Leaderboard() {
     // Need to sync current user stats first (this should actully be done in useUserProgress, but strictly for display here)
     // Real implementation should have a robust sync mechanism.
 
+    const [isEditing, setIsEditing] = useState(false);
+    const [newUsername, setNewUsername] = useState('');
+    const [newAvatar, setNewAvatar] = useState('');
+
+    const handleUpdateProfile = async () => {
+        if (!user || !newUsername.trim()) return;
+
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({ username: newUsername.trim(), avatar_url: newAvatar })
+                .eq('user_id', user.id);
+
+            if (error) throw error;
+            setIsEditing(false);
+            fetchLeaderboard(); // Refresh list
+        } catch (e) {
+            console.error('Error updating profile:', e);
+            alert('프로필 업데이트 실패');
+        }
+    };
+
     return (
         <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border-2 border-gray-100 dark:border-gray-700">
-            <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl">
-                    <Trophy className="w-6 h-6 text-yellow-600 dark:text-yellow-500" />
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                    <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl">
+                        <Trophy className="w-6 h-6 text-yellow-600 dark:text-yellow-500" />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-black text-gray-900 dark:text-white">학습 랭킹</h2>
+                        <p className="text-sm text-gray-500">이번 주 학습왕은 누구?</p>
+                    </div>
                 </div>
-                <div>
-                    <h2 className="text-xl font-black text-gray-900 dark:text-white">학습 랭킹</h2>
-                    <p className="text-sm text-gray-500">이번 주 학습왕은 누구?</p>
-                </div>
+                {user && (
+                    <button
+                        onClick={() => {
+                            setNewUsername(leaders.find(l => l.user_id === user.id)?.username || '');
+                            setIsEditing(true);
+                        }}
+                        className="text-xs font-bold text-gray-400 hover:text-indigo-500 bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg transition-colors"
+                    >
+                        내 프로필 설정
+                    </button>
+                )}
             </div>
+
+            {/* Profile Edit Modal (Inline Simple) */}
+            {isEditing && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 w-full max-w-sm shadow-2xl">
+                        <h3 className="text-lg font-bold mb-4">프로필 설정</h3>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 mb-1">닉네임</label>
+                                <input
+                                    value={newUsername}
+                                    onChange={(e) => setNewUsername(e.target.value)}
+                                    className="w-full p-3 rounded-xl border-2 border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900"
+                                    placeholder="닉네임을 입력하세요"
+                                />
+                            </div>
+                            <div className="flex gap-2">
+                                <button onClick={() => setIsEditing(false)} className="flex-1 py-3 rounded-xl font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700">취소</button>
+                                <button onClick={handleUpdateProfile} className="flex-1 py-3 rounded-xl font-bold bg-indigo-600 text-white hover:bg-indigo-700">저장</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {isLoading ? (
                 <div className="space-y-3 animate-pulse">

@@ -108,7 +108,8 @@ Title: ${title || '(not specified)'}
 
 Your task:
 1. Try to identify this song. If you recognize it, use actual famous lyrics lines from the song.
-2. Generate 8-10 Japanese sentences that are ACTUAL famous lyrics or similar-sounding lines from this song or this artist's style.
+2. Generate 8-10 Japanese sentences that are ACTUAL famous lyrics or similar-sounding lines from this song or this artist's style. 
+   **CRITIVE: Each sentence must be SHORT (1-2 lines of lyrics max). Do NOT combine multiple verses into one string.**
 3. Extract 10-15 key vocabulary words and grammar patterns with Korean meanings.
 
 IMPORTANT: The sentences MUST be realistic Japanese lyrics. Do NOT leave the array empty.
