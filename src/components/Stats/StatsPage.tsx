@@ -150,7 +150,7 @@ export function StatsPage() {
 
             {/* Danger Zone */}
             <div className="border border-red-100 dark:border-red-900/30 bg-red-50 dark:bg-red-900/10 rounded-2xl p-6 mt-8">
-                <h3 className="text-lg font-bold text-red-600 dark:text-red-400 mb-2">위험 구역</h3>
+                <h3 className="text-lg font-bold text-red-600 dark:text-red-400 mb-2">WARNING</h3>
                 <p className="text-sm text-gray-500 mb-4">학습 기록을 초기화하면 복구할 수 없습니다.</p>
                 <button
                     onClick={handleReset}
