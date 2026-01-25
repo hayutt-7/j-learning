@@ -1,6 +1,6 @@
 'use client';
 
-import { Brain, Type, BarChart3, Menu, Music } from 'lucide-react';
+import { Brain, Type, BarChart3, Menu, Music, Mic } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ViewMode } from './Sidebar';
 
@@ -13,6 +13,7 @@ export function MobileNav({ currentView, onViewChange }: MobileNavProps) {
     const navItems = [
         { id: 'translate', label: '작문', icon: Type },
         { id: 'vocab', label: '단어', icon: Brain },
+        { id: 'speaking', label: '회화', icon: Mic },
         { id: 'song', label: '노래', icon: Music },
         { id: 'stats', label: '통계', icon: BarChart3 },
     ];
