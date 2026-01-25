@@ -15,13 +15,15 @@ export function ChatMessage({ userInput, result, onChatClick }: ChatMessageProps
     return (
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* User Message */}
-            <div className="flex justify-end">
-                <div className="flex items-start gap-3 max-w-[85%]">
-                    <div className="bg-indigo-600 text-white px-4 py-3 rounded-2xl rounded-br-md shadow-sm">
-                        <p className="text-sm font-medium">{userInput}</p>
-                    </div>
-                    <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center shrink-0">
-                        <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            <div className="sticky top-0 z-10 py-2 -mx-4 px-4 bg-gray-50/95 dark:bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-gray-50/80 supports-[backdrop-filter]:dark:bg-black/80">
+                <div className="flex justify-end">
+                    <div className="flex items-start gap-3 max-w-[85%]">
+                        <div className="bg-indigo-600 text-white px-4 py-3 rounded-2xl rounded-br-md shadow-sm">
+                            <p className="text-sm font-medium">{userInput}</p>
+                        </div>
+                        <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center shrink-0">
+                            <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                        </div>
                     </div>
                 </div>
             </div>

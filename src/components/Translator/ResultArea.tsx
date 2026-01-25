@@ -35,8 +35,8 @@ export function ResultArea({ result, isLoading, onChatClick }: ResultAreaProps) 
 
     return (
         <div className="group relative mt-6 overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-sm ring-1 ring-gray-100 dark:ring-gray-700 transition-all">
-            <div className="flex items-start justify-between gap-4">
-                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 leading-relaxed font-sans flex flex-wrap gap-x-1 gap-y-2 flex-1">
+            <div className="flex items-end justify-between gap-4">
+                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 leading-relaxed font-sans flex flex-wrap items-end gap-x-1 gap-y-2 flex-1">
                     {result.tokens && result.tokens.length > 0 ? (
                         result.tokens.map((token, idx) => {
                             // Find matching matching learning item
@@ -52,7 +52,7 @@ export function ResultArea({ result, isLoading, onChatClick }: ResultAreaProps) 
                                     <TokenTooltip item={matchedItem} reading={token.reading}>
                                         {token.reading && token.reading !== token.text ? (
                                             <ruby className="flex flex-col items-center group/ruby">
-                                                <rt className="text-[11px] text-indigo-500 dark:text-indigo-400 font-normal mb-0.5 select-none opacity-70 group-hover/ruby:opacity-100 transition-opacity">{token.reading}</rt>
+                                                <rt className="text-[11px] text-indigo-600 dark:text-indigo-300 font-medium mb-0.5 select-none opacity-100 group-hover/ruby:opacity-100 transition-opacity">{token.reading}</rt>
                                                 <span>{token.text}</span>
                                             </ruby>
                                         ) : (

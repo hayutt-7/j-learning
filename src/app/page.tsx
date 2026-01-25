@@ -9,9 +9,10 @@ import { VocabStudy } from '@/components/Vocab/VocabStudy';
 import { SongStudy } from '@/components/Song/SongStudy';
 import { StatsPage } from '@/components/Stats/StatsPage';
 
+import { createSession, getMessages, saveMessage } from '@/lib/chat-service';
+import { useAuth } from '@/hooks/useAuth';
 import { AnalysisResult } from '@/lib/types';
 import { translateAndAnalyze } from './actions';
-
 import { ChatModal } from "@/components/Chat/ChatModal";
 import { Sparkles } from 'lucide-react';
 
@@ -30,6 +31,10 @@ export default function Home() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [currentContext, setCurrentContext] = useState('');
 
+  // Chat History State
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const { user } = useAuth();
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -41,10 +46,87 @@ export default function Home() {
     scrollToBottom();
   }, [messages]);
 
+  // Load messages when session creates/changes
+  const loadSessionMessages = async (sessionId: string) => {
+    setIsLoading(true);
+    try {
+      const history = await getMessages(sessionId);
+      const convertedMessages: Message[] = history.map(msg => ({
+        id: msg.id,
+        userInput: msg.role === 'user' ? (typeof msg.content === 'string' ? msg.content : '...') : '',  // We need to pair user input with result properly
+        // This is tricky. Our DB stores individual messages (user, assistant).
+        // But the UI expects combined [User + Result] pairs (Message interface).
+        // We need to reconstruct pairs.
+        result: msg.role === 'assistant' ? (msg.content as AnalysisResult) : { translatedText: '', items: [] },
+      })).filter(msg => {
+        // Simple reconstruction: assume strictly alternating User -> Assistant in DB?
+        // Actually, let's rethink the Message interface or how we load it.
+        // Current UI: Mapped by Message object which contains { userInput, result }.
+        // DB: Rows of { role: 'user', content: string } and { role: 'assistant', content: json }.
+        // We should group them.
+        return true;
+      });
+
+      // Grouping logic
+      const pairedMessages: Message[] = [];
+      let tempUserMsg: { id: string, text: string } | null = null;
+
+      for (const msg of history) {
+        if (msg.role === 'user') {
+          tempUserMsg = { id: msg.id, text: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content) };
+        } else if (msg.role === 'assistant' && tempUserMsg) {
+          pairedMessages.push({
+            id: msg.id, // Use assistant msg id as the pair id
+            userInput: tempUserMsg.text,
+            result: msg.content as AnalysisResult
+          });
+          tempUserMsg = null;
+        }
+      }
+
+      setMessages(pairedMessages);
+      setCurrentSessionId(sessionId);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleNewChat = () => {
+    setCurrentSessionId(null);
+    setMessages([]);
+    setCurrentContext('');
+  };
+
+  const handleSessionSelect = (sessionId: string) => {
+    loadSessionMessages(sessionId);
+  };
+
   const handleTranslate = async (text: string) => {
     setIsLoading(true);
     setError(null);
+
+    // Optimistic UI update
+    const tempId = Date.now().toString();
+    // We can't show it immediately in the list unless we have the result.
+    // So just loading state is fine.
+
     try {
+      // 1. Create session if needed
+      let sessionId = currentSessionId;
+      if (!sessionId && user) {
+        const session = await createSession(user.id, text.slice(0, 30) + (text.length > 30 ? '...' : ''));
+        sessionId = session.id;
+        setCurrentSessionId(sessionId);
+      }
+
+      // 2. Save User Message
+      if (sessionId && user) {
+        await saveMessage(sessionId, 'user', text);
+      }
+
+      // 3. Get AI Response
       const data = await translateAndAnalyze(text);
 
       const newMessage: Message = {
@@ -55,6 +137,11 @@ export default function Home() {
 
       setMessages(prev => [...prev, newMessage]);
       setCurrentContext(data.translatedText);
+
+      // 4. Save Assistant Message
+      if (sessionId && user) {
+        await saveMessage(sessionId, 'assistant', data);
+      }
 
       // Record exposures
       if (data.items && data.items.length > 0) {
@@ -73,7 +160,13 @@ export default function Home() {
   const hasMessages = messages.length > 0;
 
   return (
-    <AppShell currentView={currentView} onViewChange={setCurrentView}>
+    <AppShell
+      currentView={currentView}
+      onViewChange={setCurrentView}
+      currentSessionId={currentSessionId}
+      onSessionSelect={handleSessionSelect}
+      onNewChat={handleNewChat}
+    >
       {currentView === 'translate' && (
         <div className="flex flex-col h-[calc(100vh-80px)] relative">
           {/* Chat Messages Area */}

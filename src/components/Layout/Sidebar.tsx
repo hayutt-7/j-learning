@@ -1,19 +1,30 @@
 'use client';
 
-import { GraduationCap, Brain, Type, BarChart3, Settings, LogOut, LayoutDashboard, Music } from 'lucide-react';
+import { GraduationCap, Brain, Type, BarChart3, Settings, LogOut, LayoutDashboard, Music, MessageSquare, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { useEffect, useState } from 'react';
+import { ChatSession, getSessions } from '@/lib/chat-service';
 
 export type ViewMode = 'translate' | 'vocab' | 'song' | 'stats';
 
 interface SidebarProps {
     currentView: ViewMode;
     onViewChange: (view: ViewMode) => void;
+    currentSessionId?: string | null;
+    onSessionSelect?: (sessionId: string) => void;
+    onNewChat?: () => void;
     className?: string;
 }
 
-export function Sidebar({ currentView, onViewChange, className }: SidebarProps) {
-    const { signOut } = useAuth();
+export function Sidebar({ currentView, onViewChange, currentSessionId, onSessionSelect, onNewChat, className }: SidebarProps) {
+    const { user, signOut } = useAuth();
+    const [sessions, setSessions] = useState<ChatSession[]>([]);
+
+    useEffect(() => {
+        if (!user) return;
+        getSessions(user.id).then(setSessions);
+    }, [user, currentSessionId]); // Refresh when session changes (e.g. new chat created)
 
     const menuItems = [
         { id: 'translate', label: '작문/번역', icon: Type },
@@ -34,27 +45,73 @@ export function Sidebar({ currentView, onViewChange, className }: SidebarProps) 
                 </div>
             </div>
 
-            <nav className="flex-1 px-4 py-6 space-y-2">
-                <div className="text-xs font-bold text-gray-400 px-4 mb-4 uppercase tracking-wider">Menu</div>
-                {menuItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = currentView === item.id;
-                    return (
-                        <button
-                            key={item.id}
-                            onClick={() => onViewChange(item.id as ViewMode)}
-                            className={cn(
-                                "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group text-left",
-                                isActive
-                                    ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-bold shadow-sm"
-                                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200 font-medium"
-                            )}
-                        >
-                            <Icon className={cn("w-5 h-5 transition-colors", isActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 group-hover:text-gray-600")} />
-                            <span>{item.label}</span>
-                        </button>
-                    );
-                })}
+            <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto scrollbar-hide">
+                {/* Main Menu */}
+                <div className="space-y-2">
+                    <div className="text-xs font-bold text-gray-400 px-4 mb-2 uppercase tracking-wider">Menu</div>
+                    {menuItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = currentView === item.id;
+                        return (
+                            <button
+                                key={item.id}
+                                onClick={() => onViewChange(item.id as ViewMode)}
+                                className={cn(
+                                    "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group text-left",
+                                    isActive
+                                        ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-bold shadow-sm"
+                                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200 font-medium"
+                                )}
+                            >
+                                <Icon className={cn("w-5 h-5 transition-colors", isActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 group-hover:text-gray-600")} />
+                                <span>{item.label}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Chat History Section */}
+                {user && onNewChat && onSessionSelect && (
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between px-4 mb-2">
+                            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Recent Chats</div>
+                            <button onClick={onNewChat} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md text-indigo-500 transition-colors" title="New Chat">
+                                <Plus className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-1">
+                            <button
+                                onClick={onNewChat}
+                                className={cn(
+                                    "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group text-left border border-dashed border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700",
+                                    !currentSessionId ? "bg-indigo-50 dark:bg-indigo-900/10 border-indigo-200 dark:border-indigo-800" : "bg-transparent"
+                                )}
+                            >
+                                <div className={cn("w-6 h-6 rounded-lg flex items-center justify-center transition-colors", !currentSessionId ? "bg-indigo-100 dark:bg-indigo-800" : "bg-gray-100 dark:bg-gray-800 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/50")}>
+                                    <Plus className={cn("w-3.5 h-3.5", !currentSessionId ? "text-indigo-600 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400")} />
+                                </div>
+                                <span className={cn("text-sm font-medium", !currentSessionId ? "text-indigo-700 dark:text-indigo-300" : "text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200")}>New Chat</span>
+                            </button>
+
+                            {sessions.map((session) => (
+                                <button
+                                    key={session.id}
+                                    onClick={() => onSessionSelect(session.id)}
+                                    className={cn(
+                                        "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group text-left truncate",
+                                        currentSessionId === session.id
+                                            ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium"
+                                            : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200"
+                                    )}
+                                >
+                                    <MessageSquare className="w-4 h-4 shrink-0 opacity-70" />
+                                    <span className="truncate text-sm">{session.title || '새로운 대화'}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </nav>
 
             <div className="p-4 border-t border-gray-100 dark:border-gray-800">

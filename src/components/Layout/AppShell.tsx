@@ -15,9 +15,12 @@ interface AppShellProps {
     children: ReactNode;
     currentView?: ViewMode; // Optional for now to not break other pages if any
     onViewChange?: (view: ViewMode) => void;
+    currentSessionId?: string | null;
+    onSessionSelect?: (sessionId: string) => void;
+    onNewChat?: () => void;
 }
 
-export function AppShell({ children, currentView = 'translate', onViewChange = () => { } }: AppShellProps) {
+export function AppShell({ children, currentView = 'translate', onViewChange = () => { }, currentSessionId, onSessionSelect, onNewChat }: AppShellProps) {
     const [isQuizOpen, setIsQuizOpen] = useState(false);
     const [isLogsOpen, setIsLogsOpen] = useState(false);
     const [isReviewOpen, setIsReviewOpen] = useState(false);
@@ -49,7 +52,13 @@ export function AppShell({ children, currentView = 'translate', onViewChange = (
 
             {/* Desktop Sidebar */}
             <div className="hidden lg:block fixed inset-y-0 left-0 z-50">
-                <Sidebar currentView={currentView} onViewChange={onViewChange} />
+                <Sidebar
+                    currentView={currentView}
+                    onViewChange={onViewChange}
+                    currentSessionId={currentSessionId}
+                    onSessionSelect={onSessionSelect}
+                    onNewChat={onNewChat}
+                />
             </div>
 
             {/* Mobile Header (Simplified) & Bottom Nav */}
