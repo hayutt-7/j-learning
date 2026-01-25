@@ -1,6 +1,6 @@
 'use server';
 
-import { analyzeJapaneseWithGroq, chatWithGroq } from "@/lib/groq";
+import { analyzeJapaneseWithGemini, chatWithGemini } from "@/lib/gemini";
 import { AnalysisResult } from "@/lib/types";
 
 export async function translateAndAnalyze(text: string): Promise<AnalysisResult> {
@@ -9,7 +9,7 @@ export async function translateAndAnalyze(text: string): Promise<AnalysisResult>
     }
 
     try {
-        return await analyzeJapaneseWithGroq(text);
+        return await analyzeJapaneseWithGemini(text);
     } catch (error: unknown) {
         console.error("Translation error:", error);
 
@@ -28,7 +28,7 @@ export async function translateAndAnalyze(text: string): Promise<AnalysisResult>
 
 export async function chatWithAI(message: string, context: string, history: any[]) {
     try {
-        return await chatWithGroq(message, context, history);
+        return await chatWithGemini(message, context, history);
     } catch (error) {
         console.error("Chat error:", error);
         return "죄송합니다. 오류가 발생했습니다.";

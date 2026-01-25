@@ -2,6 +2,7 @@ import { Volume2, Copy, Check, MessageCircleQuestion } from 'lucide-react';
 import { AnalysisResult } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { TokenTooltip } from './TokenTooltip';
 
 interface ResultAreaProps {
     result: AnalysisResult;
@@ -37,18 +38,30 @@ export function ResultArea({ result, isLoading, onChatClick }: ResultAreaProps) 
             <div className="flex items-start justify-between gap-4">
                 <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 leading-relaxed font-sans flex flex-wrap gap-x-1 gap-y-2 flex-1">
                     {result.tokens && result.tokens.length > 0 ? (
-                        result.tokens.map((token, idx) => (
-                            <span key={idx} className="inline-block">
-                                {token.reading ? (
-                                    <ruby className="flex flex-col items-center group/ruby cursor-help">
-                                        <rt className="text-[11px] text-indigo-500 dark:text-indigo-400 font-normal mb-0.5 select-none opacity-70 group-hover/ruby:opacity-100 transition-opacity">{token.reading}</rt>
-                                        <span>{token.text}</span>
-                                    </ruby>
-                                ) : (
-                                    <span>{token.text}</span>
-                                )}
-                            </span>
-                        ))
+                        result.tokens.map((token, idx) => {
+                            // Find matching matching learning item
+                            // We match primarily by text, but fallback to reading match if needed or partials?
+                            // For simplicity, let's match by exact text.
+                            const matchedItem = result.items.find(item =>
+                                item.text === token.text ||
+                                (token.reading && item.reading === token.reading && item.text === token.text)
+                            );
+
+                            return (
+                                <span key={idx} className="inline-block mx-0.5"> {/* Added slight margin for separation */}
+                                    <TokenTooltip item={matchedItem} reading={token.reading}>
+                                        {token.reading && token.reading !== token.text ? (
+                                            <ruby className="flex flex-col items-center group/ruby">
+                                                <rt className="text-[11px] text-indigo-500 dark:text-indigo-400 font-normal mb-0.5 select-none opacity-70 group-hover/ruby:opacity-100 transition-opacity">{token.reading}</rt>
+                                                <span>{token.text}</span>
+                                            </ruby>
+                                        ) : (
+                                            <span>{token.text}</span>
+                                        )}
+                                    </TokenTooltip>
+                                </span>
+                            );
+                        })
                     ) : (
                         <span>{result.translatedText}</span>
                     )}
