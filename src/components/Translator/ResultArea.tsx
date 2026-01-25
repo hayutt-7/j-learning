@@ -12,6 +12,7 @@ interface ResultAreaProps {
 
 export function ResultArea({ result, isLoading, onChatClick }: ResultAreaProps) {
     const [copied, setCopied] = useState(false);
+    const { isMastered } = useLearningHistory();
 
     const handleTTS = () => {
         if (!result.translatedText) return;
@@ -44,16 +45,27 @@ export function ResultArea({ result, isLoading, onChatClick }: ResultAreaProps) 
                                 (token.reading && item.reading === token.reading && item.text === token.text)
                             );
 
+                            const mastered = matchedItem ? isMastered(matchedItem.id) : false;
+
                             return (
                                 <span key={idx} className="inline-block mx-0.5">
                                     <TokenTooltip item={matchedItem} reading={token.reading}>
                                         {token.reading && token.reading !== token.text ? (
                                             <ruby className="flex flex-col items-center group/ruby">
-                                                <rt className="text-[11px] text-indigo-600 dark:text-indigo-300 font-medium mb-0.5 select-none opacity-100 group-hover/ruby:opacity-100 transition-opacity">{token.reading}</rt>
-                                                <span>{token.text}</span>
+                                                <rt className={cn(
+                                                    "text-[11px] font-medium mb-0.5 select-none opacity-100 group-hover/ruby:opacity-100 transition-opacity",
+                                                    mastered ? "text-gray-300 dark:text-gray-600" : "text-indigo-600 dark:text-indigo-300"
+                                                )}>{token.reading}</rt>
+                                                <span className={cn(
+                                                    "transition-colors",
+                                                    mastered && "text-gray-300 dark:text-gray-600 font-normal decoration-gray-200"
+                                                )}>{token.text}</span>
                                             </ruby>
                                         ) : (
-                                            <span>{token.text}</span>
+                                            <span className={cn(
+                                                "transition-colors",
+                                                mastered && "text-gray-300 dark:text-gray-600 font-normal"
+                                            )}>{token.text}</span>
                                         )}
                                     </TokenTooltip>
                                 </span>

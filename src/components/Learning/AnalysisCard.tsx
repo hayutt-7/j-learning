@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, BookOpen, ALargeSmall } from 'lucide-react';
+import { Check, BookOpen, ALargeSmall, Star } from 'lucide-react';
 import { LearningItem } from '@/lib/types';
 import { useLearningHistory } from '@/hooks/useLearningHistory';
 import { cn } from '@/lib/utils';
@@ -11,8 +11,9 @@ interface AnalysisCardProps {
 }
 
 export function AnalysisCard({ item }: AnalysisCardProps) {
-    const { toggleMastery, isMastered } = useLearningHistory();
+    const { toggleMastery, toggleBookmark, isMastered, isBookmarked } = useLearningHistory();
     const mastered = isMastered(item.id);
+    const bookmarked = isBookmarked(item.id);
     const [isExpanded, setIsExpanded] = useState(true);
 
     const Icon = item.type === 'grammar' ? BookOpen : ALargeSmall;
@@ -28,7 +29,7 @@ export function AnalysisCard({ item }: AnalysisCardProps) {
         >
             {/* Header */}
             <div className="flex items-start justify-between p-5 gap-4"> {/* Increased padding */}
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-4 flex-1">
                     <div className={cn(
                         "p-2.5 rounded-xl shrink-0 mt-0.5 transition-colors", // Larger icon box
                         item.type === 'grammar'
@@ -37,7 +38,7 @@ export function AnalysisCard({ item }: AnalysisCardProps) {
                     )}>
                         <Icon className="w-5 h-5" />
                     </div>
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 flex-1">
                         <div className="flex items-center flex-wrap gap-2">
                             <h3 className="font-bold text-gray-900 dark:text-gray-50 text-xl leading-tight tracking-tight"> {/* Better typography */}
                                 {item.reading ? (
@@ -74,18 +75,35 @@ export function AnalysisCard({ item }: AnalysisCardProps) {
                     </div>
                 </div>
 
-                <button
-                    onClick={() => toggleMastery(item.id)}
-                    className={cn(
-                        "flex items-center justify-center w-11 h-11 rounded-full transition-all border shrink-0 focus:outline-none focus:ring-4 focus:ring-indigo-100 dark:focus:ring-indigo-900", // Larger touch target
-                        mastered
-                            ? "bg-indigo-600 border-indigo-600 text-white shadow-indigo-200 dark:shadow-none shadow-md"
-                            : "border-gray-100 dark:border-gray-800 text-gray-300 dark:text-gray-600 hover:border-indigo-200 dark:hover:border-indigo-800 hover:text-indigo-500 dark:hover:text-indigo-400 bg-white dark:bg-gray-800"
-                    )}
-                    aria-label={mastered ? "Mark as unmastered" : "Mark as mastered"} // Accessibility
-                >
-                    <Check className={cn("w-5 h-5 stroke-[3] transition-transform", mastered ? "scale-100" : "scale-90")} />
-                </button>
+                <div className="flex items-center gap-2">
+                    {/* Bookmark Button */}
+                    <button
+                        onClick={() => toggleBookmark(item.id)}
+                        className={cn(
+                            "flex items-center justify-center w-11 h-11 rounded-full transition-all border shrink-0 focus:outline-none focus:ring-4 focus:ring-amber-100 dark:focus:ring-amber-900",
+                            bookmarked
+                                ? "bg-amber-100 border-amber-200 text-amber-500 dark:bg-amber-900/20 dark:border-amber-800"
+                                : "border-gray-100 dark:border-gray-800 text-gray-300 dark:text-gray-600 hover:border-amber-200 dark:hover:border-amber-800 hover:text-amber-500 dark:hover:text-amber-400 bg-white dark:bg-gray-800"
+                        )}
+                        title={bookmarked ? "단어장에서 제거" : "나만의 단어장에 추가"}
+                    >
+                        <Star className={cn("w-5 h-5 transition-transform", bookmarked ? "fill-current" : "")} />
+                    </button>
+
+                    {/* Master Check Button */}
+                    <button
+                        onClick={() => toggleMastery(item.id)}
+                        className={cn(
+                            "flex items-center justify-center w-11 h-11 rounded-full transition-all border shrink-0 focus:outline-none focus:ring-4 focus:ring-indigo-100 dark:focus:ring-indigo-900",
+                            mastered
+                                ? "bg-indigo-600 border-indigo-600 text-white shadow-indigo-200 dark:shadow-none shadow-md"
+                                : "border-gray-100 dark:border-gray-800 text-gray-300 dark:text-gray-600 hover:border-indigo-200 dark:hover:border-indigo-800 hover:text-indigo-500 dark:hover:text-indigo-400 bg-white dark:bg-gray-800"
+                        )}
+                        title={mastered ? "학습 중으로 변경" : "마스터함 (숨기기)"}
+                    >
+                        <Check className={cn("w-5 h-5 stroke-[3] transition-transform", mastered ? "scale-100" : "scale-90")} />
+                    </button>
+                </div>
             </div>
 
             {/* Content */}

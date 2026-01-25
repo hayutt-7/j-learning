@@ -13,7 +13,9 @@ interface LearningHistoryState {
     getDueItems: () => LearningHistoryItem[];
 
     toggleMastery: (itemId: string) => void; // Legacy manual override
+    toggleBookmark: (itemId: string) => void;
     isMastered: (itemId: string) => boolean;
+    isBookmarked: (itemId: string) => boolean;
     shouldHide: (itemId: string) => boolean;
     syncWithSupabase: (user: any) => Promise<void>;
 }
@@ -54,6 +56,7 @@ export const useLearningHistory = create<LearningHistoryState>()(
                                 exposureCount: 1,
                                 lastSeenAt: now,
                                 isMastered: false,
+                                isBookmarked: false,
                                 // SRS Defaults
                                 easeFactor: 2.5,
                                 interval: 0,
@@ -125,8 +128,12 @@ export const useLearningHistory = create<LearningHistoryState>()(
             getDueItems: () => {
                 const now = Date.now();
                 return Object.values(get().history).filter(item => {
+                    // Filter logic: 
+                    // 1. Must be tracked (obviously)
+                    // 2. Not mastered
+                    // 3. Due for review
+
                     if (item.isMastered) return false;
-                    // If nextReviewDate is missing (legacy items), treat as due
                     return !item.nextReviewDate || item.nextReviewDate <= now;
                 }).sort((a, b) => (a.nextReviewDate || 0) - (b.nextReviewDate || 0));
             },
@@ -142,6 +149,24 @@ export const useLearningHistory = create<LearningHistoryState>()(
                             [itemId]: {
                                 ...current,
                                 isMastered: !current.isMastered,
+                                // If manually unmastered, maybe reset review date? No, keep it.
+                            },
+                        },
+                    };
+                });
+            },
+
+            toggleBookmark: (itemId) => {
+                set((state) => {
+                    const current = state.history[itemId];
+                    if (!current) return state;
+
+                    return {
+                        history: {
+                            ...state.history,
+                            [itemId]: {
+                                ...current,
+                                isBookmarked: !current.isBookmarked,
                             },
                         },
                     };
@@ -150,6 +175,10 @@ export const useLearningHistory = create<LearningHistoryState>()(
 
             isMastered: (itemId) => {
                 return !!get().history[itemId]?.isMastered;
+            },
+
+            isBookmarked: (itemId) => {
+                return !!get().history[itemId]?.isBookmarked;
             },
 
             shouldHide: (itemId) => {

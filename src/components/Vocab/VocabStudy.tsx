@@ -4,7 +4,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { JLPTLevel, LearningItem } from '@/lib/types';
 import { LevelSelector } from './LevelSelector';
 import { VocabCard } from './VocabCard';
-import { ArrowLeft, ChevronLeft, ChevronRight, Trophy, X, Zap, BookX, Flame, Settings, Eye, EyeOff, Filter } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Trophy, X, Zap, BookX, Flame, Settings, Eye, EyeOff, Filter, Star } from 'lucide-react';
 import { useUserProgress, XP_TABLE } from '@/hooks/useUserProgress';
 import { useLearningHistory } from '@/hooks/useLearningHistory';
 import { VOCAB_DATABASE } from '@/lib/vocabDatabase';
@@ -31,19 +31,56 @@ export function VocabStudy() {
     const [showSettings, setShowSettings] = useState(false);
 
     const { addXp, updateStreak } = useUserProgress();
+    const { history, isBookmarked } = useLearningHistory(); // Get history to filter bookmarks
 
     const currentItem = cards[currentIndex];
 
-    const startSession = useCallback((selected: JLPTLevel) => {
-        const pool = VOCAB_DATABASE[selected || 'N5'] || VOCAB_DATABASE['N5'];
+    // Get bookmarked items from history
+    const getBookmarkedItems = useCallback(() => {
+        return Object.values(history).filter(item => isBookmarked(item.itemId)).map(historyItem => {
+            // Convert history item back to LearningItem format roughly for the card
+            return {
+                id: historyItem.itemId,
+                text: historyItem.text || '',
+                type: historyItem.type || 'vocab',
+                meaning: historyItem.meaning || '',
+                explanation: "저장된 단어입니다.", // We might not have full explanation stored if came from partial data, but usually we do. 
+                // Actually, useLearningHistory stores limited fields. 
+                // If we want full richness, we'd need to fetch from DB or store full item.
+                // For now, let's assume history has enough or minimal is ok.
+                // Wait, useLearningHistory records minimal fields? 
+                // Let's check recordExposures. It stores text, meaning, reading. 
+                // It does NOT store 'explanation', 'examples' etc.
+                // This is a problem for "My Vocab" full study.
+                // Solution: We should rely on what we have, or maybe useLearningHistory SHOULD store more.
+                // Prioritizing user request: "복습할 수 있게". Meaning/Text is MVP.
+                reading: historyItem.reading,
+                jlpt: historyItem.jlpt,
+            } as LearningItem;
+        });
+    }, [history, isBookmarked]);
+
+    const startSession = useCallback((selected: JLPTLevel | 'BOOKMARKED') => {
+        let pool: LearningItem[] = [];
+
+        if (selected === 'BOOKMARKED') {
+            pool = getBookmarkedItems();
+            if (pool.length === 0) {
+                alert("저장된 단어가 없습니다. 번역 결과에서 ★ 버튼을 눌러 단어를 저장해보세요!");
+                return;
+            }
+        } else {
+            pool = VOCAB_DATABASE[selected || 'N5'] || VOCAB_DATABASE['N5'];
+        }
+
         // Shuffle the pool
         const shuffled = [...pool].sort(() => Math.random() - 0.5);
         setCards(shuffled);
-        setLevel(selected);
+        setLevel(selected as JLPTLevel); // Type casting for state
         setCurrentIndex(0);
         setCardStatuses(new Map());
         setSessionStats({ totalXp: 0, cardsStudied: 0, correctCount: 0, incorrectCount: 0 });
-    }, []);
+    }, [getBookmarkedItems]);
 
     const handleResult = (result: 'know' | 'dont_know') => {
         if (!level || !currentItem) return;
@@ -138,7 +175,47 @@ export function VocabStudy() {
     const currentStatus = currentItem ? cardStatuses.get(currentItem.id) : undefined;
 
     if (!level) {
-        return <LevelSelector onSelect={startSession} />;
+        return (
+            <div className="flex flex-col items-center justify-center h-full w-full max-w-4xl mx-auto px-4">
+                <div className="w-full mb-12 text-center">
+                    <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">단어장 선택</h2>
+                    <p className="text-gray-500 dark:text-gray-400">학습할 레벨이나 모드를 선택해주세요.</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
+                    {/* Custom Vocab Button */}
+                    <button
+                        onClick={() => startSession('BOOKMARKED')}
+                        className="group relative flex flex-col items-center p-8 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 border-2 border-amber-200 dark:border-amber-800 rounded-3xl hover:scale-105 transition-all shadow-lg hover:shadow-amber-500/20"
+                    >
+                        <div className="p-4 bg-white dark:bg-gray-800 rounded-full shadow-md mb-4 group-hover:rotate-12 transition-transform">
+                            <Star className="w-8 h-8 text-amber-500 fill-current" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">나만의 단어장</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 text-center font-medium">
+                            북마크한 단어 집중 복습
+                        </p>
+                        <div className="absolute top-4 right-4 bg-white/80 dark:bg-gray-900/80 px-3 py-1 rounded-full text-xs font-bold text-amber-600 dark:text-amber-400 backdrop-blur-sm">
+                            Saved
+                        </div>
+                    </button>
+
+                    {/* JLPT Levels */}
+                    <div className="grid grid-cols-2 gap-4">
+                        {['N5', 'N4', 'N3', 'N2', 'N1'].map((jlpt) => (
+                            <button
+                                key={jlpt}
+                                onClick={() => startSession(jlpt as JLPTLevel)}
+                                className="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-indigo-200 transition-all group"
+                            >
+                                <span className="text-lg font-bold text-gray-400 group-hover:text-indigo-500 transition-colors">{jlpt}</span>
+                                <span className="text-xs text-gray-400 mt-1">Level</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     return (

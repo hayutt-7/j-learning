@@ -38,6 +38,7 @@ export interface LearningHistoryItem {
     interval: number;        // Days until next review
     repetitions: number;     // Consecutive correct answers
     nextReviewDate: number;  // Timestamp for next review
+    isBookmarked?: boolean;  // Saved to custom vocab list
 }
 
 export interface AnalysisResult {
