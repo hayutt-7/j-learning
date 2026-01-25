@@ -1,6 +1,6 @@
 'use client';
 
-import { GraduationCap, Brain, Type, BarChart3, Settings, LogOut, LayoutDashboard, Music, MessageSquare, Plus, Trash2 } from 'lucide-react';
+import { GraduationCap, Brain, Type, BarChart3, Settings, LogOut, LayoutDashboard, Music, MessageSquare, Plus, Trash2, ScrollText, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState, useRef } from 'react';
@@ -56,7 +56,7 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
     const menuItems = [
         { id: 'translate', label: '작문/번역', icon: Type },
         { id: 'vocab', label: '단어 암기', icon: Brain },
-        { id: 'song', label: '노래 학습', icon: Music },
+        { id: 'song', label: '콘텐츠 학습', icon: ScrollText },
         { id: 'stats', label: '학습 통계', icon: BarChart3 },
     ];
 

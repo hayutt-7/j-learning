@@ -4,7 +4,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { JLPTLevel, LearningItem } from '@/lib/types';
 import { LevelSelector } from './LevelSelector';
 import { VocabCard } from './VocabCard';
-import { ArrowLeft, ChevronLeft, ChevronRight, Trophy, X, Zap, BookX, Flame, Settings, Eye, EyeOff, Filter, Star } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Trophy, X, Zap, BookX, Flame, Settings, Eye, EyeOff, Filter, Star, Download } from 'lucide-react';
 import { useUserProgress, XP_TABLE } from '@/hooks/useUserProgress';
 import { useLearningHistory } from '@/hooks/useLearningHistory';
 import { VOCAB_DATABASE } from '@/lib/vocabDatabase';
@@ -59,6 +59,32 @@ export function VocabStudy() {
             } as LearningItem;
         });
     }, [history, isBookmarked]);
+
+    const downloadAnkiCSV = () => {
+        const items = getBookmarkedItems();
+        if (items.length === 0) {
+            alert("내보낼 단어가 없습니다. 먼저 단어를 저장해주세요!");
+            return;
+        }
+
+        // CSV Header (Explicit for Anki: Front, Back)
+        // Format: Text, Meaning <br> Reading <br> Type
+        const csvContent = items.map(item => {
+            const front = `"${item.text.replace(/"/g, '""')}"`;
+            const back = `"${item.meaning.replace(/"/g, '""')}<br><small>${item.reading || ''}</small>"`;
+            return `${front},${back}`;
+        }).join('\n');
+
+        // Add BOM for Excel/Anki UTF-8 compatibility
+        const BOM = '\uFEFF';
+        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `j-learning_anki_export_${new Date().toISOString().slice(0, 10)}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
 
     const startSession = useCallback((selected: JLPTLevel | 'BOOKMARKED') => {
         let pool: LearningItem[] = [];
@@ -184,21 +210,32 @@ export function VocabStudy() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
                     {/* Custom Vocab Button */}
-                    <button
-                        onClick={() => startSession('BOOKMARKED')}
-                        className="group relative flex flex-col items-center p-8 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 border-2 border-amber-200 dark:border-amber-800 rounded-3xl hover:scale-105 transition-all shadow-lg hover:shadow-amber-500/20"
-                    >
-                        <div className="p-4 bg-white dark:bg-gray-800 rounded-full shadow-md mb-4 group-hover:rotate-12 transition-transform">
-                            <Star className="w-8 h-8 text-amber-500 fill-current" />
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">나만의 단어장</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 text-center font-medium">
-                            북마크한 단어 집중 복습
-                        </p>
-                        <div className="absolute top-4 right-4 bg-white/80 dark:bg-gray-900/80 px-3 py-1 rounded-full text-xs font-bold text-amber-600 dark:text-amber-400 backdrop-blur-sm">
-                            Saved
-                        </div>
-                    </button>
+                    <div className="relative group flex flex-col items-center bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 border-2 border-amber-200 dark:border-amber-800 rounded-3xl shadow-lg hover:shadow-amber-500/20 transition-all hover:-translate-y-1">
+                        <button
+                            onClick={() => startSession('BOOKMARKED')}
+                            className="w-full h-full p-8 flex flex-col items-center"
+                        >
+                            <div className="p-4 bg-white dark:bg-gray-800 rounded-full shadow-md mb-4 group-hover:rotate-12 transition-transform">
+                                <Star className="w-8 h-8 text-amber-500 fill-current" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">나만의 단어장</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-300 text-center font-medium">
+                                북마크한 단어 집중 복습
+                            </p>
+                            <div className="absolute top-4 right-4 bg-white/80 dark:bg-gray-900/80 px-3 py-1 rounded-full text-xs font-bold text-amber-600 dark:text-amber-400 backdrop-blur-sm">
+                                Saved
+                            </div>
+                        </button>
+
+                        {/* Anki Export Button */}
+                        <button
+                            onClick={(e) => { e.stopPropagation(); downloadAnkiCSV(); }}
+                            className="absolute bottom-4 right-4 p-2 bg-white/90 dark:bg-gray-800/90 rounded-full text-gray-500 hover:text-green-600 hover:bg-white shadow-sm border border-transparent hover:border-green-200 transition-all"
+                            title="Anki용 CSV 내보내기"
+                        >
+                            <Download className="w-4 h-4" />
+                        </button>
+                    </div>
 
                     {/* JLPT Levels */}
                     <div className="grid grid-cols-2 gap-4">

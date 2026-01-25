@@ -6,7 +6,7 @@ import { ViewMode } from '@/components/Layout/Sidebar';
 import { InputArea } from '@/components/Translator/InputArea';
 import { ChatMessage } from '@/components/Translator/ChatMessage';
 import { VocabStudy } from '@/components/Vocab/VocabStudy';
-import { SongStudy } from '@/components/Song/SongStudy';
+import { ContentStudy } from '@/components/Content/ContentStudy';
 import { StatsPage } from '@/components/Stats/StatsPage';
 
 import { createSession, getMessages, saveMessage } from '@/lib/chat-service';
@@ -255,17 +255,9 @@ export default function Home() {
         </div>
       )}
 
-      {currentView === 'vocab' && (
-        <VocabStudy />
-      )}
-
-      {currentView === 'song' && (
-        <SongStudy />
-      )}
-
-      {currentView === 'stats' && (
-        <StatsPage />
-      )}
+      {currentView === 'vocab' && <VocabStudy />}
+      {currentView === 'song' && <ContentStudy />}
+      {currentView === 'stats' && <StatsPage />}
     </AppShell>
   );
 }

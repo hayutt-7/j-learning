@@ -34,3 +34,16 @@ export async function chatWithAI(message: string, context: string, history: any[
         return "죄송합니다. 오류가 발생했습니다.";
     }
 }
+
+export async function analyzeContent(text: string): Promise<AnalysisResult[]> {
+    if (!text.trim()) throw new Error("Text is required");
+
+    try {
+        const { analyzeLongTextWithGemini } = await import("@/lib/gemini");
+        return await analyzeLongTextWithGemini(text);
+    } catch (error) {
+        console.error("Content analysis error:", error);
+        // Fallback: Treat as single sentence or return error
+        throw new Error("콘텐츠 분석에 실패했습니다.");
+    }
+}

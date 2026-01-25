@@ -113,3 +113,62 @@ Context: "${context}"`;
     return "답변을 생성할 수 없습니다.";
   }
 }
+
+export async function analyzeLongTextWithGemini(contextText: string): Promise<AnalysisResult[]> {
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is not set");
+  }
+
+  const model = genAI.getGenerativeModel({
+    model: "gemini-flash-latest",
+    generationConfig: { responseMimeType: "application/json" }
+  });
+
+  const prompt = `
+You are a Japanese language tutor.
+Analyze the following text (lyrics, script, etc.).
+Split the text into meaningful sentences or lines (if it's lyrics, keep the lines).
+For EACH line/sentence, provide a detailed analysis in the specified JSON format.
+
+Input Text:
+"""
+${contextText}
+"""
+
+Requirements:
+1. **Split**: Break down the text line by line.
+2. **Translation**: Korean translation for each line.
+3. **Analysis**: For each line, provide tokens and key items (vocab/grammar).
+   - "tokens": Break down into words. "reading" MUST be HIRAGANA.
+   - "items": Extract detailed vocab/grammar points.
+
+Response Format (JSON Array of Objects):
+[
+  {
+    "translatedText": "Korean translation of line 1",
+    "tokens": [...],
+    "items": [...]
+  },
+  {
+    "translatedText": "Korean translation of line 2",
+    "tokens": [...],
+    "items": [...]
+  }
+]
+`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
+    const data = JSON.parse(responseText) as AnalysisResult[];
+
+    if (!Array.isArray(data)) {
+      throw new Error("Invalid response format: Expected array");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Gemini Long Text Analysis Error:", error);
+    throw new Error("Failed to analyze long text");
+  }
+}
