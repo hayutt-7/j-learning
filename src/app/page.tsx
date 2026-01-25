@@ -103,6 +103,12 @@ export default function Home() {
     loadSessionMessages(sessionId);
   };
 
+  const handleDeleteSession = (sessionId: string) => {
+    if (currentSessionId === sessionId) {
+      handleNewChat();
+    }
+  };
+
   const handleTranslate = async (text: string) => {
     setIsLoading(true);
     setError(null);
@@ -166,6 +172,7 @@ export default function Home() {
       currentSessionId={currentSessionId}
       onSessionSelect={handleSessionSelect}
       onNewChat={handleNewChat}
+      onDeleteSession={handleDeleteSession}
     >
       {currentView === 'translate' && (
         <div className="flex flex-col h-[calc(100vh-80px)] relative">

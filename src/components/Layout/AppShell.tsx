@@ -18,9 +18,10 @@ interface AppShellProps {
     currentSessionId?: string | null;
     onSessionSelect?: (sessionId: string) => void;
     onNewChat?: () => void;
+    onDeleteSession?: (sessionId: string) => void;
 }
 
-export function AppShell({ children, currentView = 'translate', onViewChange = () => { }, currentSessionId, onSessionSelect, onNewChat }: AppShellProps) {
+export function AppShell({ children, currentView = 'translate', onViewChange = () => { }, currentSessionId, onSessionSelect, onNewChat, onDeleteSession }: AppShellProps) {
     const [isQuizOpen, setIsQuizOpen] = useState(false);
     const [isLogsOpen, setIsLogsOpen] = useState(false);
     const [isReviewOpen, setIsReviewOpen] = useState(false);
@@ -58,6 +59,7 @@ export function AppShell({ children, currentView = 'translate', onViewChange = (
                     currentSessionId={currentSessionId}
                     onSessionSelect={onSessionSelect}
                     onNewChat={onNewChat}
+                    onDeleteSession={onDeleteSession}
                 />
             </div>
 

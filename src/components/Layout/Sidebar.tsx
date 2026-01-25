@@ -1,10 +1,10 @@
 'use client';
 
-import { GraduationCap, Brain, Type, BarChart3, Settings, LogOut, LayoutDashboard, Music, MessageSquare, Plus } from 'lucide-react';
+import { GraduationCap, Brain, Type, BarChart3, Settings, LogOut, LayoutDashboard, Music, MessageSquare, Plus, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
-import { useEffect, useState } from 'react';
-import { ChatSession, getSessions } from '@/lib/chat-service';
+import { useEffect, useState, useRef } from 'react';
+import { ChatSession, getSessions, deleteSession } from '@/lib/chat-service';
 
 export type ViewMode = 'translate' | 'vocab' | 'song' | 'stats';
 
@@ -14,17 +14,44 @@ interface SidebarProps {
     currentSessionId?: string | null;
     onSessionSelect?: (sessionId: string) => void;
     onNewChat?: () => void;
+    onDeleteSession?: (sessionId: string) => void;
     className?: string;
 }
 
-export function Sidebar({ currentView, onViewChange, currentSessionId, onSessionSelect, onNewChat, className }: SidebarProps) {
+export function Sidebar({ currentView, onViewChange, currentSessionId, onSessionSelect, onNewChat, onDeleteSession, className }: SidebarProps) {
     const { user, signOut } = useAuth();
     const [sessions, setSessions] = useState<ChatSession[]>([]);
+
+    // Context Menu State
+    const [contextMenu, setContextMenu] = useState<{ x: number; y: number; sessionId: string } | null>(null);
 
     useEffect(() => {
         if (!user) return;
         getSessions(user.id).then(setSessions);
-    }, [user, currentSessionId]); // Refresh when session changes (e.g. new chat created)
+    }, [user, currentSessionId]); // Refresh when session changes
+
+    // Close context menu on click outside
+    useEffect(() => {
+        const handleClick = () => setContextMenu(null);
+        window.addEventListener('click', handleClick);
+        return () => window.removeEventListener('click', handleClick);
+    }, []);
+
+    const handleContextMenu = (e: React.MouseEvent, sessionId: string) => {
+        e.preventDefault();
+        setContextMenu({ x: e.clientX, y: e.clientY, sessionId });
+    };
+
+    const handleDelete = async (sessionId: string) => {
+        try {
+            await deleteSession(sessionId);
+            setSessions(prev => prev.filter(s => s.id !== sessionId));
+            if (onDeleteSession) onDeleteSession(sessionId);
+            setContextMenu(null); // Close context menu after action
+        } catch (error) {
+            console.error('Failed to delete session:', error);
+        }
+    };
 
     const menuItems = [
         { id: 'translate', label: '작문/번역', icon: Type },
@@ -35,6 +62,22 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
 
     return (
         <aside className={cn("flex flex-col h-screen w-64 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 transition-colors", className)}>
+            {/* Context Menu */}
+            {contextMenu && (
+                <div
+                    className="fixed z-50 min-w-[160px] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1.5 animate-in fade-in zoom-in-95 duration-100"
+                    style={{ top: contextMenu.y, left: contextMenu.x }}
+                >
+                    <button
+                        onClick={() => handleDelete(contextMenu.sessionId)}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                        <span>삭제하기</span>
+                    </button>
+                </div>
+            )}
+
             <div className="p-6 flex items-center gap-3">
                 <div className="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none">
                     <GraduationCap className="h-6 w-6 text-white" />
@@ -98,6 +141,7 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
                                 <button
                                     key={session.id}
                                     onClick={() => onSessionSelect(session.id)}
+                                    onContextMenu={(e) => handleContextMenu(e, session.id)}
                                     className={cn(
                                         "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group text-left truncate",
                                         currentSessionId === session.id
