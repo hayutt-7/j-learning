@@ -48,7 +48,7 @@ export function StatsPage() {
     const xpProgress = nextLevelXp > 0 ? (currentXp / nextLevelXp) * 100 : 0;
 
     return (
-        <div className="max-w-3xl mx-auto py-8 px-4 animate-in fade-in duration-500">
+        <div className="max-w-3xl mx-auto py-8 px-4 pb-24 lg:pb-8 animate-in fade-in duration-500 overflow-y-auto h-full">
             <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2">학습 통계</h1>
             <p className="text-gray-500 dark:text-gray-400 mb-8">나의 학습 현황을 확인하세요</p>
 

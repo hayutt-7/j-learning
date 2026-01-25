@@ -1,11 +1,12 @@
 'use client';
 
-import { GraduationCap, Brain, Type, BarChart3, Settings, LogOut, LayoutDashboard, Music, MessageSquare, Plus, Trash2, ScrollText, Star, LogIn, Mic } from 'lucide-react';
+import { GraduationCap, Brain, Type, BarChart3, Settings, LogOut, LayoutDashboard, Music, MessageSquare, Plus, Trash2, ScrollText, Star, LogIn, Mic, User, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState, useRef } from 'react';
 import { ChatSession, getSessions, deleteSession } from '@/lib/chat-service';
 import { AuthModal } from '@/components/Auth/AuthModal';
+import { ProfileModal } from '@/components/Profile/ProfileModal';
 
 export type ViewMode = 'translate' | 'vocab' | 'song' | 'stats' | 'speaking';
 
@@ -26,6 +27,7 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
     const { user, signOut } = useAuth();
     const [sessions, setSessions] = useState<ChatSession[]>([]);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
     const [contextMenu, setContextMenu] = useState<{ x: number; y: number; sessionId: string } | null>(null);
 
     // ... useEffects
@@ -71,6 +73,7 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
     return (
         <aside className={cn("flex flex-col h-screen w-64 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 transition-colors", className)}>
             <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+            <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
 
             {/* Context Menu */}
             {contextMenu && (
@@ -170,13 +173,30 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
 
             <div className="p-4 border-t border-gray-100 dark:border-gray-800">
                 {user ? (
-                    <button
-                        onClick={() => signOut()}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors text-sm font-medium"
-                    >
-                        <LogOut className="w-5 h-5" />
-                        <span>로그아웃</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setIsProfileModalOpen(true)}
+                            className="flex-1 flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors group"
+                        >
+                            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                {user.email?.[0].toUpperCase() || <User className="w-4 h-4" />}
+                            </div>
+                            <div className="flex-1 min-w-0 text-left">
+                                <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                    {user.user_metadata?.full_name || '마이프로필'}
+                                </p>
+                                <p className="text-[10px] text-gray-400 truncate">{user.email}</p>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 transition-colors" />
+                        </button>
+                        <button
+                            onClick={() => signOut()}
+                            className="p-3 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors"
+                            title="로그아웃"
+                        >
+                            <LogOut className="w-5 h-5" />
+                        </button>
+                    </div>
                 ) : (
                     <button
                         onClick={() => setIsAuthModalOpen(true)}
