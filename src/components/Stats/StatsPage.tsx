@@ -2,17 +2,28 @@
 
 import { useLearningHistory } from '@/hooks/useLearningHistory';
 import { useUserProgress } from '@/hooks/useUserProgress';
+import { useDailyGoals } from '@/hooks/useDailyGoals';
+import { useStudyLog } from '@/hooks/useStudyLog';
 import { useAuth } from '@/hooks/useAuth';
 import { Leaderboard } from '@/components/Social/Leaderboard';
-import { Trophy, TrendingUp, Calendar, Activity, Zap, Flame } from 'lucide-react';
-import { useMemo } from 'react';
+import { WeeklyChart } from './WeeklyChart';
+import { DailyGoalsSummary } from './GoalProgress';
+import { MonthlyHeatmap } from './MonthlyHeatmap';
+import { Trophy, TrendingUp, Activity, Flame, BarChart3, Calendar } from 'lucide-react';
+import { useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/lib/supabase';
 
 export function StatsPage() {
     const { history, resetHistory } = useLearningHistory();
     const { level, currentXp, nextLevelXp, streak, resetProgress } = useUserProgress();
     const { user } = useAuth();
+    const dailyGoals = useDailyGoals();
+    const studyLog = useStudyLog();
+
+    // Reset daily goals if new day
+    useEffect(() => {
+        dailyGoals.resetIfNewDay();
+    }, []);
 
     const handleReset = async () => {
         if (!confirm('정말로 모든 학습 기록(단어, 경험치, 레벨)을 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
@@ -46,11 +57,29 @@ export function StatsPage() {
     }, [history]);
 
     const xpProgress = nextLevelXp > 0 ? (currentXp / nextLevelXp) * 100 : 0;
+    const weeklyData = studyLog.getWeeklyData();
+    const monthlyData = studyLog.getMonthlyData();
+    const goalProgress = dailyGoals.getProgress();
 
     return (
         <div className="max-w-3xl mx-auto py-8 px-4 pb-24 lg:pb-8 animate-in fade-in duration-500 overflow-y-auto h-full">
             <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2">학습 통계</h1>
             <p className="text-gray-500 dark:text-gray-400 mb-8">나의 학습 현황을 확인하세요</p>
+
+            {/* Daily Goals */}
+            <div className="mb-8">
+                <DailyGoalsSummary
+                    wordsProgress={goalProgress.words}
+                    minutesProgress={goalProgress.minutes}
+                    reviewsProgress={goalProgress.reviews}
+                    todayWords={dailyGoals.todayWords}
+                    todayMinutes={dailyGoals.todayMinutes}
+                    todayReviews={dailyGoals.todayReviews}
+                    wordsGoal={dailyGoals.wordsGoal}
+                    minutesGoal={dailyGoals.minutesGoal}
+                    reviewsGoal={dailyGoals.reviewsGoal}
+                />
+            </div>
 
             {/* Level Progress Card */}
             <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 mb-8 text-white shadow-xl">
@@ -75,6 +104,24 @@ export function StatsPage() {
                         />
                     </div>
                 </div>
+            </div>
+
+            {/* Weekly Chart */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm mb-8">
+                <div className="flex items-center gap-2 mb-6">
+                    <BarChart3 className="w-5 h-5 text-indigo-600" />
+                    <h3 className="font-bold text-gray-900 dark:text-white text-lg">주간 학습 추이</h3>
+                </div>
+                <WeeklyChart data={weeklyData} dataKey="wordsLearned" />
+            </div>
+
+            {/* Monthly Heatmap */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm mb-8">
+                <div className="flex items-center gap-2 mb-6">
+                    <Calendar className="w-5 h-5 text-emerald-600" />
+                    <h3 className="font-bold text-gray-900 dark:text-white text-lg">월간 학습 기록</h3>
+                </div>
+                <MonthlyHeatmap data={monthlyData} />
             </div>
 
             {/* Stats Grid */}
@@ -162,3 +209,4 @@ export function StatsPage() {
         </div>
     );
 }
+

@@ -7,6 +7,8 @@ import { VocabCard } from './VocabCard';
 import { ArrowLeft, ChevronLeft, ChevronRight, Trophy, X, Zap, BookX, Flame, Settings, Eye, EyeOff, Filter, Star, Download } from 'lucide-react';
 import { useUserProgress, XP_TABLE } from '@/hooks/useUserProgress';
 import { useLearningHistory } from '@/hooks/useLearningHistory';
+import { useDailyGoals } from '@/hooks/useDailyGoals';
+import { useStudyLog } from '@/hooks/useStudyLog';
 import { VOCAB_DATABASE } from '@/lib/vocabDatabase';
 
 type CardStatus = 'know' | 'dont_know' | 'unseen';
@@ -32,6 +34,8 @@ export function VocabStudy() {
 
     const { addXp, updateStreak } = useUserProgress();
     const { history, isBookmarked } = useLearningHistory(); // Get history to filter bookmarks
+    const dailyGoals = useDailyGoals();
+    const studyLog = useStudyLog();
 
     const currentItem = cards[currentIndex];
 
@@ -121,6 +125,10 @@ export function VocabStudy() {
                 const xp = XP_TABLE.VOCAB_CORRECT[level] || 10;
                 addXp(xp);
                 updateStreak();
+                // Update daily goals and study log
+                dailyGoals.addWords(1);
+                dailyGoals.addXp(xp);
+                studyLog.logStudy({ wordsLearned: 1, xpEarned: xp });
                 setSessionStats(prev => ({
                     ...prev,
                     totalXp: prev.totalXp + xp,
@@ -128,6 +136,9 @@ export function VocabStudy() {
                     correctCount: prev.correctCount + 1
                 }));
             } else {
+                // Still count as studied for goals
+                dailyGoals.addWords(1);
+                studyLog.logStudy({ wordsLearned: 1 });
                 setSessionStats(prev => ({
                     ...prev,
                     cardsStudied: prev.cardsStudied + 1,

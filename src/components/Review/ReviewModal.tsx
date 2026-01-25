@@ -1,7 +1,9 @@
 'use client';
 
 import { useLearningHistory } from '@/hooks/useLearningHistory';
-import { X, Volume2, Trophy, ChevronRight } from 'lucide-react';
+import { useDailyGoals } from '@/hooks/useDailyGoals';
+import { useStudyLog } from '@/hooks/useStudyLog';
+import { X, Volume2, Trophy, ChevronRight, Clock } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { LearningHistoryItem } from '@/lib/types';
 
@@ -12,6 +14,8 @@ interface ReviewModalProps {
 
 export function ReviewModal({ isOpen, onClose }: ReviewModalProps) {
     const { getDueItems, reviewItem } = useLearningHistory();
+    const dailyGoals = useDailyGoals();
+    const studyLog = useStudyLog();
     const [dueItems, setDueItems] = useState<LearningHistoryItem[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showAnswer, setShowAnswer] = useState(false);
@@ -48,6 +52,11 @@ export function ReviewModal({ isOpen, onClose }: ReviewModalProps) {
     const handleAnswer = (quality: number) => {
         if (!currentItem) return;
         reviewItem(currentItem.itemId, quality);
+
+        // Update daily goals and study log
+        dailyGoals.addReviews(1);
+        studyLog.logStudy({ reviewsDone: 1 });
+
         setStats(prev => ({
             reviewed: prev.reviewed + 1,
             correct: quality >= 3 ? prev.correct + 1 : prev.correct
@@ -151,23 +160,49 @@ export function ReviewModal({ isOpen, onClose }: ReviewModalProps) {
                                     <h2 className="text-4xl font-black text-gray-900 dark:text-white mb-3">
                                         {currentItem.text}
                                     </h2>
-                                    <p className="text-2xl font-bold text-gray-600 dark:text-gray-300 mb-8 break-keep">
+                                    <p className="text-2xl font-bold text-gray-600 dark:text-gray-300 mb-6 break-keep">
                                         {currentItem.meaning}
                                     </p>
 
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <button
-                                            onClick={() => handleAnswer(1)}
-                                            className="py-4 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
-                                        >
-                                            몰라요
-                                        </button>
-                                        <button
-                                            onClick={() => handleAnswer(5)}
-                                            className="py-4 rounded-xl bg-emerald-500 text-white font-bold hover:bg-emerald-600 transition-colors"
-                                        >
-                                            알아요!
-                                        </button>
+                                    {/* SRS Quality Buttons */}
+                                    <div className="space-y-3">
+                                        <p className="text-xs text-gray-400 font-medium mb-2">얼마나 잘 기억했나요?</p>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            <button
+                                                onClick={() => handleAnswer(1)}
+                                                className="py-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors text-sm"
+                                            >
+                                                <div className="text-lg">😵</div>
+                                                <div>모름</div>
+                                            </button>
+                                            <button
+                                                onClick={() => handleAnswer(3)}
+                                                className="py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 font-bold hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors text-sm"
+                                            >
+                                                <div className="text-lg">🤔</div>
+                                                <div>어려움</div>
+                                            </button>
+                                            <button
+                                                onClick={() => handleAnswer(4)}
+                                                className="py-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-bold hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors text-sm"
+                                            >
+                                                <div className="text-lg">😊</div>
+                                                <div>좋음</div>
+                                            </button>
+                                            <button
+                                                onClick={() => handleAnswer(5)}
+                                                className="py-3 rounded-xl bg-emerald-500 text-white font-bold hover:bg-emerald-600 transition-colors text-sm"
+                                            >
+                                                <div className="text-lg">🎯</div>
+                                                <div>완벽!</div>
+                                            </button>
+                                        </div>
+
+                                        {/* Next review hint */}
+                                        <div className="flex items-center justify-center gap-1 text-xs text-gray-400 mt-2">
+                                            <Clock className="w-3 h-3" />
+                                            <span>다음 복습: 선택에 따라 1일~{Math.round(currentItem.interval * currentItem.easeFactor)}일 후</span>
+                                        </div>
                                     </div>
                                 </div>
                             )}
