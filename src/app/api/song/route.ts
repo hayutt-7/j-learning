@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Groq from 'groq-sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY || '',
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export async function POST(request: NextRequest) {
     try {
         const { artist, title, userLyrics, youtubeUrl } = await request.json();
+
+        const model = genAI.getGenerativeModel({
+            model: "gemini-1.5-flash",
+            generationConfig: { responseMimeType: "application/json" }
+        });
 
         let videoId = '';
         if (youtubeUrl) {
@@ -47,14 +50,8 @@ Respond in JSON:
         { "id": "yt_v1", "text": "word", "reading": "reading", "meaning": "meaning", "type": "vocab", "jlpt": "N3", "example": "example", "explanation": "" }
     ]
 }`;
-            const completion = await groq.chat.completions.create({
-                model: "llama-3.3-70b-versatile",
-                messages: [{ role: "user", content: ytPrompt }],
-                temperature: 0.7,
-                max_tokens: 4000,
-                response_format: { type: "json_object" }
-            });
-            const content = completion.choices[0]?.message?.content || '{}';
+            const result = await model.generateContent(ytPrompt);
+            const content = result.response.text();
             const data = JSON.parse(content);
             return NextResponse.json({ ...data, videoId });
         }
@@ -88,15 +85,8 @@ ${userLyrics}
 
 가사에서 핵심 단어와 문법 10-15개를 추출하고, 각 문장을 sentences 배열에 넣어주세요.`;
 
-            const completion = await groq.chat.completions.create({
-                model: "llama-3.3-70b-versatile",
-                messages: [{ role: "user", content: lyricsPrompt }],
-                temperature: 0.5,
-                max_tokens: 4000,
-                response_format: { type: "json_object" }
-            });
-
-            const content = completion.choices[0]?.message?.content || '{}';
+            const result = await model.generateContent(lyricsPrompt);
+            const content = result.response.text();
             const data = JSON.parse(content);
             return NextResponse.json(data);
         }
@@ -139,15 +129,8 @@ Respond in this exact JSON format:
 
 Even if you cannot identify the exact song, ALWAYS provide at least 5 sentences and 8 vocab items based on similar Japanese pop songs.`;
 
-        const completion = await groq.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
-            messages: [{ role: "user", content: prompt }],
-            temperature: 0.7,
-            max_tokens: 4000,
-            response_format: { type: "json_object" }
-        });
-
-        const content = completion.choices[0]?.message?.content || '{}';
+        const result = await model.generateContent(prompt);
+        const content = result.response.text();
         const data = JSON.parse(content);
 
         // Ensure sentences and vocabItems are not empty

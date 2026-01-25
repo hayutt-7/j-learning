@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Groq from 'groq-sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY || '',
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export async function POST(request: NextRequest) {
     try {
         const { word, meaning } = await request.json();
+
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const prompt = `Generate a simple, natural Japanese example sentence for the word "${word}" (meaning: ${meaning}).
 Target JLPT level: N4-N3 level (not too complex).
@@ -18,14 +18,8 @@ Example output:
 
 Output ONLY the sentence string.`;
 
-        const completion = await groq.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
-            messages: [{ role: "user", content: prompt }],
-            temperature: 0.7,
-            max_tokens: 100,
-        });
-
-        const sentence = completion.choices[0]?.message?.content?.trim() || '';
+        const result = await model.generateContent(prompt);
+        const sentence = result.response.text().trim();
         return NextResponse.json({ sentence });
     } catch (error) {
         console.error('Example API error:', error);
