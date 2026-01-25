@@ -9,8 +9,9 @@ import { Leaderboard } from '@/components/Social/Leaderboard';
 import { WeeklyChart } from './WeeklyChart';
 import { DailyGoalsSummary } from './GoalProgress';
 import { MonthlyHeatmap } from './MonthlyHeatmap';
+import { GoalSettingsModal } from './GoalSettingsModal';
 import { Trophy, TrendingUp, Activity, Flame, BarChart3, Calendar } from 'lucide-react';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 export function StatsPage() {
@@ -19,6 +20,7 @@ export function StatsPage() {
     const { user } = useAuth();
     const dailyGoals = useDailyGoals();
     const studyLog = useStudyLog();
+    const [showGoalSettings, setShowGoalSettings] = useState(false);
 
     // Reset daily goals if new day
     useEffect(() => {
@@ -78,8 +80,15 @@ export function StatsPage() {
                     wordsGoal={dailyGoals.wordsGoal}
                     minutesGoal={dailyGoals.minutesGoal}
                     reviewsGoal={dailyGoals.reviewsGoal}
+                    onOpenSettings={() => setShowGoalSettings(true)}
                 />
             </div>
+
+            {/* Goal Settings Modal */}
+            <GoalSettingsModal
+                isOpen={showGoalSettings}
+                onClose={() => setShowGoalSettings(false)}
+            />
 
             {/* Level Progress Card */}
             <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 mb-8 text-white shadow-xl">

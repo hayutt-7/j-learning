@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { Settings } from 'lucide-react';
 
 interface GoalProgressProps {
     progress: number; // 0-100
@@ -77,12 +78,14 @@ interface DailyGoalsSummaryProps {
     wordsGoal: number;
     minutesGoal: number;
     reviewsGoal: number;
+    onOpenSettings?: () => void;
 }
 
 export function DailyGoalsSummary({
     wordsProgress, minutesProgress, reviewsProgress,
     todayWords, todayMinutes, todayReviews,
-    wordsGoal, minutesGoal, reviewsGoal
+    wordsGoal, minutesGoal, reviewsGoal,
+    onOpenSettings
 }: DailyGoalsSummaryProps) {
     const overallProgress = (wordsProgress + minutesProgress + reviewsProgress) / 3;
 
@@ -93,13 +96,24 @@ export function DailyGoalsSummary({
                     <h3 className="font-bold text-gray-900 dark:text-white text-lg">오늘의 목표</h3>
                     <p className="text-sm text-gray-500">매일 조금씩 꾸준히!</p>
                 </div>
-                <div className={cn(
-                    "px-3 py-1.5 rounded-full text-sm font-bold",
-                    overallProgress >= 100
-                        ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
-                        : "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
-                )}>
-                    {overallProgress >= 100 ? '🎉 완료!' : `${Math.round(overallProgress)}% 달성`}
+                <div className="flex items-center gap-2">
+                    <div className={cn(
+                        "px-3 py-1.5 rounded-full text-sm font-bold",
+                        overallProgress >= 100
+                            ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
+                            : "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
+                    )}>
+                        {overallProgress >= 100 ? '🎉 완료!' : `${Math.round(overallProgress)}% 달성`}
+                    </div>
+                    {onOpenSettings && (
+                        <button
+                            onClick={onOpenSettings}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                            title="목표 설정"
+                        >
+                            <Settings className="w-5 h-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -129,3 +143,4 @@ export function DailyGoalsSummary({
         </div>
     );
 }
+

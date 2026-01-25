@@ -99,7 +99,7 @@ export function ContentStudy() {
     }
 
     return (
-        <div className="max-w-2xl mx-auto py-12 px-4">
+        <div className="max-w-2xl mx-auto py-8 px-4 pb-40 lg:pb-12">
             <div className="text-center mb-10">
                 <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                     <ScrollText className="w-8 h-8 text-white" />

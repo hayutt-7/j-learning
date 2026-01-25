@@ -173,28 +173,27 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
 
             <div className="p-4 border-t border-gray-100 dark:border-gray-800">
                 {user ? (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
                         <button
                             onClick={() => setIsProfileModalOpen(true)}
-                            className="flex-1 flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors group"
+                            className="flex-1 flex items-center gap-3 hover:opacity-80 transition-opacity"
                         >
-                            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                {user.email?.[0].toUpperCase() || <User className="w-4 h-4" />}
+                            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0">
+                                {user.email?.[0].toUpperCase() || <User className="w-5 h-5" />}
                             </div>
                             <div className="flex-1 min-w-0 text-left">
                                 <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
                                     {user.user_metadata?.full_name || '마이프로필'}
                                 </p>
-                                <p className="text-[10px] text-gray-400 truncate">{user.email}</p>
+                                <p className="text-[11px] text-gray-400 truncate">{user.email}</p>
                             </div>
-                            <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 transition-colors" />
                         </button>
                         <button
                             onClick={() => signOut()}
-                            className="p-3 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors"
+                            className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors shrink-0"
                             title="로그아웃"
                         >
-                            <LogOut className="w-5 h-5" />
+                            <LogOut className="w-4 h-4" />
                         </button>
                     </div>
                 ) : (
