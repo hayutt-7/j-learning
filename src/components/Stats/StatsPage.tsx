@@ -2,14 +2,31 @@
 
 import { useLearningHistory } from '@/hooks/useLearningHistory';
 import { useUserProgress } from '@/hooks/useUserProgress';
+import { useAuth } from '@/hooks/useAuth';
 import { Leaderboard } from '@/components/Social/Leaderboard';
 import { Trophy, TrendingUp, Calendar, Activity, Zap, Flame } from 'lucide-react';
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
 
 export function StatsPage() {
-    const { history } = useLearningHistory();
-    const { level, currentXp, nextLevelXp, streak } = useUserProgress();
+    const { history, resetHistory } = useLearningHistory();
+    const { level, currentXp, nextLevelXp, streak, resetProgress } = useUserProgress();
+    const { user } = useAuth();
+
+    const handleReset = async () => {
+        if (!confirm('정말로 모든 학습 기록(단어, 경험치, 레벨)을 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
+
+        try {
+            await resetHistory(user);
+            await resetProgress(user);
+            alert('모든 학습 기록이 초기화되었습니다.');
+            window.location.reload();
+        } catch (e) {
+            console.error(e);
+            alert('초기화 중 오류가 발생했습니다.');
+        }
+    };
 
     const stats = useMemo(() => {
         const items = Object.values(history);
@@ -129,6 +146,18 @@ export function StatsPage() {
             {/* Leaderboard Section */}
             <div className="mb-8">
                 <Leaderboard />
+            </div>
+
+            {/* Danger Zone */}
+            <div className="border border-red-100 dark:border-red-900/30 bg-red-50 dark:bg-red-900/10 rounded-2xl p-6 mt-8">
+                <h3 className="text-lg font-bold text-red-600 dark:text-red-400 mb-2">위험 구역</h3>
+                <p className="text-sm text-gray-500 mb-4">학습 기록을 초기화하면 복구할 수 없습니다.</p>
+                <button
+                    onClick={handleReset}
+                    className="px-4 py-2 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 text-red-500 rounded-xl text-sm font-bold hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                >
+                    학습 기록 초기화
+                </button>
             </div>
         </div>
     );

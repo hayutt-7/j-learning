@@ -18,6 +18,7 @@ interface LearningHistoryState {
     isBookmarked: (itemId: string) => boolean;
     shouldHide: (itemId: string) => boolean;
     syncWithSupabase: (user: any) => Promise<void>;
+    resetHistory: (user: any) => Promise<void>;
 }
 
 export const useLearningHistory = create<LearningHistoryState>()(
@@ -259,6 +260,14 @@ export const useLearningHistory = create<LearningHistoryState>()(
                         .upsert(itemsToPush, { onConflict: 'user_id, item_id' });
 
                     if (pushError) console.error('Failed to push updates:', pushError);
+                }
+            },
+
+            resetHistory: async (user: any) => {
+                set({ history: {} });
+                if (user) {
+                    const { supabase } = await import('@/lib/supabase');
+                    await supabase.from('study_logs').delete().eq('user_id', user.id);
                 }
             }
         }),

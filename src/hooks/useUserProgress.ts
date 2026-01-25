@@ -12,6 +12,7 @@ interface UserProgressState {
     addXp: (amount: number) => void;
     checkLevelUp: () => boolean; // Returns true if leveled up
     updateStreak: () => void;
+    resetProgress: (user: any) => Promise<void>;
 }
 
 // XP Balance Config
@@ -83,6 +84,25 @@ export const useUserProgress = create<UserProgressState>()(
                         return { streak: 1, lastStudyDate: today };
                     }
                 });
+            },
+
+            resetProgress: async (user: any) => {
+                set({
+                    level: 1,
+                    currentXp: 0,
+                    nextLevelXp: 100,
+                    streak: 0,
+                    lastStudyDate: null
+                });
+                if (user) {
+                    const { supabase } = await import('@/lib/supabase');
+                    await supabase.from('profiles').update({
+                        level: 1,
+                        total_xp: 0,
+                        streak: 0,
+                        last_study_date: null
+                    }).eq('user_id', user.id);
+                }
             }
         }),
         {
