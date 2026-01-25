@@ -72,13 +72,13 @@ export function ChatModal({ isOpen, onClose, contextText }: ChatModalProps) {
     };
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center pointer-events-none">
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center pointer-events-none">
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/20 backdrop-blur-sm pointer-events-auto" onClick={onClose} />
+            <div className="absolute inset-0 bg-black/50 pointer-events-auto" onClick={onClose} />
 
             {/* Modal */}
-            <div className="bg-white dark:bg-gray-900 w-full sm:max-w-md sm:rounded-2xl shadow-2xl h-[80vh] sm:h-[600px] pointer-events-auto flex flex-col overflow-hidden animate-in slide-in-from-bottom border dark:border-gray-800">
-                <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-white/50 dark:bg-gray-900/80 backdrop-blur-md">
+            <div className="bg-white dark:bg-gray-900 w-full sm:max-w-md sm:rounded-2xl shadow-2xl h-[80vh] sm:h-[600px] pointer-events-auto flex flex-col overflow-hidden border dark:border-gray-800">
+                <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-gray-900">
                     <div className="flex items-center gap-2">
                         <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
                             <Bot className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
@@ -99,8 +99,8 @@ export function ChatModal({ isOpen, onClose, contextText }: ChatModalProps) {
                                 </div>
                             )}
                             <div className={`max-w-[80%] rounded-2xl p-3 text-sm leading-relaxed ${msg.role === 'user'
-                                    ? 'bg-indigo-600 text-white rounded-br-none'
-                                    : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-700 rounded-tl-none shadow-sm'
+                                ? 'bg-indigo-600 text-white rounded-br-none'
+                                : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-700 rounded-tl-none shadow-sm'
                                 }`}>
                                 {msg.content}
                             </div>
