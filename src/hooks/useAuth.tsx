@@ -53,18 +53,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch (error) {
             console.error('Error signing out:', error);
         } finally {
-            // Clear all Supabase tokens from localStorage
+            // Nuke everything to ensure logout
             if (typeof window !== 'undefined') {
-                Object.keys(window.localStorage).forEach((key) => {
-                    if (key.startsWith('sb-') && key.endsWith('-auth-token')) {
-                        window.localStorage.removeItem(key);
-                    }
+                window.localStorage.clear();
+                window.sessionStorage.clear();
+
+                // Clear cookies just in case
+                document.cookie.split(";").forEach((c) => {
+                    document.cookie = c
+                        .replace(/^ +/, "")
+                        .replace(/=.*/, "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/");
                 });
             }
 
             setSession(null);
             setUser(null);
-            window.location.href = '/'; // Hard redirect to home
+
+            alert("로그아웃 되었습니다.");
+            window.location.replace('/');
         }
     };
 
