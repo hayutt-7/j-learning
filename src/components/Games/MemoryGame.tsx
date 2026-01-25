@@ -39,7 +39,7 @@ export function MemoryGame({ words, onBack }: MemoryGameProps) {
 
         const wordCards: Card[] = shuffled.map(w => ({
             id: `word-${w.itemId}`,
-            text: w.text,
+            text: w.text || '',
             pairId: w.itemId,
             isFlipped: false,
             isMatched: false,
@@ -47,7 +47,7 @@ export function MemoryGame({ words, onBack }: MemoryGameProps) {
 
         const meaningCards: Card[] = shuffled.map(w => ({
             id: `meaning-${w.itemId}`,
-            text: w.meaning,
+            text: w.meaning || '',
             pairId: w.itemId,
             isFlipped: false,
             isMatched: false,
@@ -101,7 +101,7 @@ export function MemoryGame({ words, onBack }: MemoryGameProps) {
 
         const wordCards: Card[] = shuffled.map(w => ({
             id: `word-${w.itemId}`,
-            text: w.text,
+            text: w.text || '',
             pairId: w.itemId,
             isFlipped: false,
             isMatched: false,
@@ -109,7 +109,7 @@ export function MemoryGame({ words, onBack }: MemoryGameProps) {
 
         const meaningCards: Card[] = shuffled.map(w => ({
             id: `meaning-${w.itemId}`,
-            text: w.meaning,
+            text: w.meaning || '',
             pairId: w.itemId,
             isFlipped: false,
             isMatched: false,

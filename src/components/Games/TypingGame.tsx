@@ -55,7 +55,7 @@ export function TypingGame({ words, onBack }: TypingGameProps) {
         if (!currentWord || isFinished) return;
 
         const trimmedInput = input.trim().toLowerCase();
-        const correctAnswer = currentWord.meaning.toLowerCase();
+        const correctAnswer = currentWord?.meaning?.toLowerCase() || '';
 
         // Check if answer is correct (allow partial match)
         const isCorrect = correctAnswer.includes(trimmedInput) && trimmedInput.length >= 2;
