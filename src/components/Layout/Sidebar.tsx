@@ -63,7 +63,7 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
     const menuItems = [
         { id: 'translate', label: '작문/번역', icon: Type },
         { id: 'vocab', label: '단어 암기', icon: Brain },
-        { id: 'speaking', label: '회화 연습', icon: Mic },
+        { id: 'speaking', label: '회화 연습 (New)', icon: Mic },
         { id: 'song', label: '콘텐츠 학습', icon: ScrollText },
         { id: 'stats', label: '학습 통계', icon: BarChart3 },
     ];

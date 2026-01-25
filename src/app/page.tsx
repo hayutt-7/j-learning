@@ -167,7 +167,6 @@ export default function Home() {
   const hasMessages = messages.length > 0;
 
   return (
-  return (
     <AppShell
       currentView={currentView}
       onViewChange={setCurrentView}
