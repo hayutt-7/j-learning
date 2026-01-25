@@ -1,10 +1,11 @@
 'use client';
 
-import { GraduationCap, Brain, Type, BarChart3, Settings, LogOut, LayoutDashboard, Music, MessageSquare, Plus, Trash2, ScrollText, Star } from 'lucide-react';
+import { GraduationCap, Brain, Type, BarChart3, Settings, LogOut, LayoutDashboard, Music, MessageSquare, Plus, Trash2, ScrollText, Star, LogIn } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState, useRef } from 'react';
 import { ChatSession, getSessions, deleteSession } from '@/lib/chat-service';
+import { AuthModal } from '@/components/Auth/AuthModal';
 
 export type ViewMode = 'translate' | 'vocab' | 'song' | 'stats';
 
@@ -21,12 +22,16 @@ interface SidebarProps {
 export function Sidebar({ currentView, onViewChange, currentSessionId, onSessionSelect, onNewChat, onDeleteSession, className }: SidebarProps) {
     const { user, signOut } = useAuth();
     const [sessions, setSessions] = useState<ChatSession[]>([]);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
     // Context Menu State
     const [contextMenu, setContextMenu] = useState<{ x: number; y: number; sessionId: string } | null>(null);
 
     useEffect(() => {
-        if (!user) return;
+        if (!user) {
+            setSessions([]);
+            return;
+        };
         getSessions(user.id).then(setSessions);
     }, [user, currentSessionId]); // Refresh when session changes
 
@@ -62,6 +67,8 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
 
     return (
         <aside className={cn("flex flex-col h-screen w-64 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 transition-colors", className)}>
+            <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+
             {/* Context Menu */}
             {contextMenu && (
                 <div
@@ -168,9 +175,13 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
                         <span>로그아웃</span>
                     </button>
                 ) : (
-                    <div className="px-4 py-2 text-xs text-center text-gray-400">
-                        게스트 모드
-                    </div>
+                    <button
+                        onClick={() => setIsAuthModalOpen(true)}
+                        className="w-full flex items-center gap-3 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors text-sm font-bold shadow-lg shadow-indigo-200 dark:shadow-none"
+                    >
+                        <LogIn className="w-5 h-5" />
+                        <span>로그인</span>
+                    </button>
                 )}
             </div>
         </aside>

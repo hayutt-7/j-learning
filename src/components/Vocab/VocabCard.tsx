@@ -111,6 +111,25 @@ export function VocabCard({ item, onResult, showReading = true }: VocabCardProps
         onResult(result);
     };
 
+    const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!showAnswer) {
+            setShowAnswer(true);
+        } else {
+            // Determine click position relative to card center
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const width = rect.width;
+
+            if (x < width / 2) {
+                // Left side click -> Don't Know
+                handleAnswer('dont_know');
+            } else {
+                // Right side click -> Know
+                handleAnswer('know');
+            }
+        }
+    };
+
     return (
         <div
             className="w-full max-w-sm mx-auto select-none"
@@ -140,8 +159,8 @@ export function VocabCard({ item, onResult, showReading = true }: VocabCardProps
 
                 {/* Card Body */}
                 <div
-                    className="p-8 min-h-[300px] flex flex-col items-center justify-center cursor-pointer"
-                    onClick={() => !showAnswer && setShowAnswer(true)}
+                    className="p-8 min-h-[300px] flex flex-col items-center justify-center cursor-pointer relative"
+                    onClick={handleCardClick}
                 >
                     {!showAnswer ? (
                         <h2 className="text-6xl font-black text-gray-900 dark:text-white leading-tight break-keep text-center">
