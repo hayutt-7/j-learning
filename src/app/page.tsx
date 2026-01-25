@@ -1,11 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { AppShell } from '@/components/Layout/AppShell';
 import { ViewMode } from '@/components/Layout/Sidebar';
 import { InputArea } from '@/components/Translator/InputArea';
-import { ResultArea } from '@/components/Translator/ResultArea';
-import { AnalysisList } from '@/components/Learning/AnalysisList';
+import { ChatMessage } from '@/components/Translator/ChatMessage';
 import { VocabStudy } from '@/components/Vocab/VocabStudy';
 import { SongStudy } from '@/components/Song/SongStudy';
 import { StatsPage } from '@/components/Stats/StatsPage';
@@ -14,24 +13,50 @@ import { AnalysisResult } from '@/lib/types';
 import { translateAndAnalyze } from './actions';
 
 import { ChatModal } from "@/components/Chat/ChatModal";
+import { Sparkles } from 'lucide-react';
+
+interface Message {
+  id: string;
+  userInput: string;
+  result: AnalysisResult;
+}
 
 export default function Home() {
   const [currentView, setCurrentView] = useState<ViewMode>('translate');
 
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [currentContext, setCurrentContext] = useState('');
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleTranslate = async (text: string) => {
     setIsLoading(true);
-    setResult(null);
     setError(null);
     try {
       const data = await translateAndAnalyze(text);
-      setResult(data);
 
-      // Record exposures (React Best Practice: Side Effects in Event Handlers)
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        userInput: text,
+        result: data,
+      };
+
+      setMessages(prev => [...prev, newMessage]);
+      setCurrentContext(data.translatedText);
+
+      // Record exposures
       if (data.items && data.items.length > 0) {
         import('@/hooks/useLearningHistory').then(({ useLearningHistory }) => {
           useLearningHistory.getState().recordExposures(data.items);
@@ -45,75 +70,87 @@ export default function Home() {
     }
   };
 
+  const hasMessages = messages.length > 0;
+
   return (
     <AppShell currentView={currentView} onViewChange={setCurrentView}>
       {currentView === 'translate' && (
-        <div className="space-y-6 lg:space-y-8 relative animate-in fade-in duration-500">
-          <div className="space-y-2 text-center mb-6 lg:mb-10">
-            <h2 className="text-2xl lg:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-              일본어, 자연스럽게 익히세요
-            </h2>
-            <p className="text-base lg:text-lg text-gray-500 dark:text-gray-400">
-              하고 싶은 말을 한국어로 입력하면, AI가 자연스러운 일본어로 바꿔줍니다.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative px-1">
-            {/* Left Column: Input & Translation */}
-            <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24 transition-all duration-300">
-              <InputArea onTranslate={handleTranslate} isLoading={isLoading} />
-
-              {isLoading && (
-                <div className="py-12 text-center">
-                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-100 border-t-indigo-600 dark:border-indigo-900 dark:border-t-indigo-500"></div>
-                  <p className="mt-4 text-sm text-gray-400 animate-pulse">Analyzing grammar & nuance...</p>
+        <div className="flex flex-col h-[calc(100vh-80px)] relative">
+          {/* Chat Messages Area */}
+          <div
+            ref={scrollContainerRef}
+            className={`flex-1 overflow-y-auto px-4 py-6 ${!hasMessages ? 'flex items-center justify-center' : ''}`}
+          >
+            {!hasMessages && !isLoading ? (
+              /* Welcome Screen - Centered */
+              <div className="text-center max-w-2xl mx-auto animate-in fade-in duration-700">
+                <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                  <Sparkles className="w-8 h-8 text-white" />
                 </div>
-              )}
+                <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-3">
+                  일본어, 자연스럽게 익히세요
+                </h2>
+                <p className="text-lg text-gray-500 dark:text-gray-400 mb-8">
+                  하고 싶은 말을 한국어로 입력하면,<br />
+                  AI가 자연스러운 일본어로 바꿔드려요.
+                </p>
+              </div>
+            ) : (
+              /* Messages List */
+              <div className="max-w-4xl mx-auto space-y-8">
+                {messages.map((message) => (
+                  <ChatMessage
+                    key={message.id}
+                    userInput={message.userInput}
+                    result={message.result}
+                    onChatClick={() => {
+                      setCurrentContext(message.result.translatedText);
+                      setIsChatOpen(true);
+                    }}
+                  />
+                ))}
 
-              {error && (
-                <div className="mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-center">
-                  <p className="text-red-600 dark:text-red-400 font-medium">{error}</p>
-                </div>
-              )}
-
-              {result && (
-                <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
-                  {result.isMock && (
-                    <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-3 text-amber-800 dark:text-amber-200">
-                      <span className="text-xl">⚠️</span>
-                      <div>
-                        <p className="font-bold text-sm">AI 서비스가 혼잡합니다.</p>
-                        <p className="text-xs mt-1 opacity-90">
-                          현재 시뮬레이션 데이터로 응답하고 있습니다. 잠시 후 다시 시도하면 실제 AI 분석이 제공됩니다.
-                        </p>
+                {/* Loading Indicator */}
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shrink-0">
+                        <Sparkles className="w-4 h-4 text-white animate-pulse" />
+                      </div>
+                      <div className="bg-gray-100 dark:bg-gray-800 px-4 py-3 rounded-2xl rounded-bl-md">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                          <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                        </div>
                       </div>
                     </div>
-                  )}
-                  <ResultArea
-                    result={result}
-                    onChatClick={() => setIsChatOpen(true)}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Right Column: Analysis List */}
-            <div className="lg:col-span-7">
-              {result && <AnalysisList items={result.items} />}
-              {!result && !isLoading && (
-                <div className="hidden lg:flex h-full min-h-[400px] items-center justify-center border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-3xl bg-gray-50/50 dark:bg-gray-900/50">
-                  <div className="text-center text-gray-400 dark:text-gray-500">
-                    <p>Translation analysis will appear here</p>
                   </div>
-                </div>
-              )}
+                )}
+
+                {/* Error Message */}
+                {error && (
+                  <div className="max-w-2xl mx-auto p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-center">
+                    <p className="text-red-600 dark:text-red-400 font-medium">{error}</p>
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+            )}
+          </div>
+
+          {/* Bottom Input Area */}
+          <div className="shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg px-4 py-4">
+            <div className="max-w-4xl mx-auto">
+              <InputArea onTranslate={handleTranslate} isLoading={isLoading} />
             </div>
           </div>
 
           <ChatModal
             isOpen={isChatOpen}
             onClose={() => setIsChatOpen(false)}
-            contextText={result?.translatedText || ""}
+            contextText={currentContext}
           />
         </div>
       )}
