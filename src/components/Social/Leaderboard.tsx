@@ -53,17 +53,26 @@ export function Leaderboard() {
         if (!user || !newUsername.trim()) return;
 
         try {
-            const { error } = await supabase
+            // 1. Update Auth Metadata (Updates user session data immediately)
+            const { error: authError } = await supabase.auth.updateUser({
+                data: { full_name: newUsername.trim(), avatar_url: newAvatar }
+            });
+            if (authError) throw authError;
+
+            // 2. Update Public Profile Table
+            const { error: profileError } = await supabase
                 .from('profiles')
                 .update({ username: newUsername.trim(), avatar_url: newAvatar })
                 .eq('user_id', user.id);
 
-            if (error) throw error;
+            if (profileError) throw profileError;
+
             setIsEditing(false);
             fetchLeaderboard(); // Refresh list
-        } catch (e) {
+            alert("프로필이 성공적으로 업데이트되었습니다!");
+        } catch (e: any) {
             console.error('Error updating profile:', e);
-            alert('프로필 업데이트 실패');
+            alert(`프로필 업데이트 실패: ${e.message || '알 수 없는 오류가 발생했습니다.'}`);
         }
     };
 
