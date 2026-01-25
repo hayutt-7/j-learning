@@ -48,10 +48,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const signOut = async () => {
-        await supabase.auth.signOut();
-        setSession(null);
-        setUser(null);
-        window.location.reload(); // Force refresh to clear any cached data
+        try {
+            await supabase.auth.signOut();
+        } catch (error) {
+            console.error('Error signing out:', error);
+        } finally {
+            // Clear all Supabase tokens from localStorage
+            if (typeof window !== 'undefined') {
+                Object.keys(window.localStorage).forEach((key) => {
+                    if (key.startsWith('sb-') && key.endsWith('-auth-token')) {
+                        window.localStorage.removeItem(key);
+                    }
+                });
+            }
+
+            setSession(null);
+            setUser(null);
+            window.location.href = '/'; // Hard redirect to home
+        }
     };
 
     return (
