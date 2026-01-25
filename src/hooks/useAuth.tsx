@@ -80,7 +80,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setSession(null);
             setUser(null);
 
-            alert("로그아웃 되었습니다.");
             window.location.replace('/');
         }
     };
