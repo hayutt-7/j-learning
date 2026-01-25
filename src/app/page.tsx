@@ -188,7 +188,7 @@ export default function Home() {
                   <Sparkles className="w-8 h-8 text-white" />
                 </div>
                 <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-3">
-                  일본어, 자연스럽게 익히세요
+                  日本語、自然に身につけましょう
                 </h2>
                 <p className="text-lg text-gray-500 dark:text-gray-400 mb-8">
                   하고 싶은 말을 한국어로 입력하면,<br />
