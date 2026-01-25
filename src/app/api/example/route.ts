@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     try {
         const { word, meaning } = await request.json();
 
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
         const prompt = `Generate a simple, natural Japanese example sentence for the word "${word}" (meaning: ${meaning}).
 Target JLPT level: N4-N3 level (not too complex).
