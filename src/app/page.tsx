@@ -8,6 +8,7 @@ import { ChatMessage } from '@/components/Translator/ChatMessage';
 import { VocabStudy } from '@/components/Vocab/VocabStudy';
 import { ContentStudy } from '@/components/Content/ContentStudy';
 import { StatsPage } from '@/components/Stats/StatsPage';
+import { SpeakingStudy } from '@/components/Speaking/SpeakingStudy';
 
 import { createSession, getMessages, saveMessage } from '@/lib/chat-service';
 import { useAuth } from '@/hooks/useAuth';
@@ -255,8 +256,14 @@ export default function Home() {
         </div>
       )}
 
+      import {SpeakingStudy} from '@/components/Speaking/SpeakingStudy';
+      // ... (imports)
+
+      // ...
+
       {currentView === 'vocab' && <VocabStudy />}
       {currentView === 'song' && <ContentStudy />}
+      {currentView === 'speaking' && <SpeakingStudy />}
       {currentView === 'stats' && <StatsPage />}
     </AppShell>
   );

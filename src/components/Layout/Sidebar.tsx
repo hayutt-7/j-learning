@@ -1,16 +1,17 @@
 'use client';
 
-import { GraduationCap, Brain, Type, BarChart3, Settings, LogOut, LayoutDashboard, Music, MessageSquare, Plus, Trash2, ScrollText, Star, LogIn } from 'lucide-react';
+import { GraduationCap, Brain, Type, BarChart3, Settings, LogOut, LayoutDashboard, Music, MessageSquare, Plus, Trash2, ScrollText, Star, LogIn, Mic } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState, useRef } from 'react';
 import { ChatSession, getSessions, deleteSession } from '@/lib/chat-service';
 import { AuthModal } from '@/components/Auth/AuthModal';
 
-export type ViewMode = 'translate' | 'vocab' | 'song' | 'stats';
+export type ViewMode = 'translate' | 'vocab' | 'song' | 'stats' | 'speaking';
 
 interface SidebarProps {
     currentView: ViewMode;
+    // ... rest of props
     onViewChange: (view: ViewMode) => void;
     currentSessionId?: string | null;
     onSessionSelect?: (sessionId: string) => void;
@@ -20,12 +21,14 @@ interface SidebarProps {
 }
 
 export function Sidebar({ currentView, onViewChange, currentSessionId, onSessionSelect, onNewChat, onDeleteSession, className }: SidebarProps) {
+    // ... existing hooks
+
     const { user, signOut } = useAuth();
     const [sessions, setSessions] = useState<ChatSession[]>([]);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-
-    // Context Menu State
     const [contextMenu, setContextMenu] = useState<{ x: number; y: number; sessionId: string } | null>(null);
+
+    // ... useEffects
 
     useEffect(() => {
         if (!user) {
@@ -35,7 +38,6 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
         getSessions(user.id).then(setSessions);
     }, [user, currentSessionId]); // Refresh when session changes
 
-    // Close context menu on click outside
     useEffect(() => {
         const handleClick = () => setContextMenu(null);
         window.addEventListener('click', handleClick);
@@ -52,7 +54,7 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
             await deleteSession(sessionId);
             setSessions(prev => prev.filter(s => s.id !== sessionId));
             if (onDeleteSession) onDeleteSession(sessionId);
-            setContextMenu(null); // Close context menu after action
+            setContextMenu(null);
         } catch (error) {
             console.error('Failed to delete session:', error);
         }
@@ -61,6 +63,7 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
     const menuItems = [
         { id: 'translate', label: '작문/번역', icon: Type },
         { id: 'vocab', label: '단어 암기', icon: Brain },
+        { id: 'speaking', label: '회화 연습', icon: Mic },
         { id: 'song', label: '콘텐츠 학습', icon: ScrollText },
         { id: 'stats', label: '학습 통계', icon: BarChart3 },
     ];
