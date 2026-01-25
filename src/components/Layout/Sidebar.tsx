@@ -7,8 +7,9 @@ import { useEffect, useState, useRef } from 'react';
 import { ChatSession, getSessions, deleteSession } from '@/lib/chat-service';
 import { AuthModal } from '@/components/Auth/AuthModal';
 import { ProfileModal } from '@/components/Profile/ProfileModal';
+import { SettingsModal } from '@/components/Settings/SettingsModal';
 
-export type ViewMode = 'translate' | 'vocab' | 'games' | 'song' | 'stats';
+export type ViewMode = 'translate' | 'vocab' | 'song' | 'stats' | 'speaking';
 
 interface SidebarProps {
     currentView: ViewMode;
@@ -28,6 +29,7 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
     const [sessions, setSessions] = useState<ChatSession[]>([]);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [contextMenu, setContextMenu] = useState<{ x: number; y: number; sessionId: string } | null>(null);
 
     // ... useEffects
@@ -73,6 +75,7 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
     return (
         <aside className={cn("flex flex-col h-screen w-64 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 transition-colors", className)}>
             <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+            <SettingsModal isOpen={isSettingsModalOpen} onClose={() => setIsSettingsModalOpen(false)} />
             <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
 
             {/* Context Menu */}
@@ -182,32 +185,50 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
                                 {user.email?.[0].toUpperCase() || <User className="w-5 h-5" />}
                             </div>
                             <div className="flex-1 min-w-0 text-left">
-                                <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                                    {user.user_metadata?.full_name || '마이프로필'}
-                                </p>
-                                <p className="text-[11px] text-gray-400 truncate">{user.email}</p>
-                            </div>
-                        </button>
-                        <div className="h-8 w-[1px] bg-gray-200 dark:bg-gray-700 mx-1" />
-
-                        <button
-                            onClick={() => signOut()}
-                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors shrink-0"
-                            title="로그아웃"
-                        >
-                            <LogOut className="w-4 h-4" />
-                        </button>
-                    </div>
-                ) : (
-                    <button
-                        onClick={() => setIsAuthModalOpen(true)}
-                        className="w-full flex items-center gap-3 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors text-sm font-bold shadow-lg shadow-indigo-200 dark:shadow-none"
-                    >
-                        <LogIn className="w-5 h-5" />
-                        <span>로그인</span>
-                    </button>
+                                <>
+                                    <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-xl mb-2">
+                                        <button
+                                            onClick={() => setIsProfileModalOpen(true)}
+                                            className="flex-1 flex items-center gap-3 hover:opacity-80 transition-opacity"
+                                        >
+                                            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0">
+                                                {user.email?.[0].toUpperCase() || <User className="w-5 h-5" />}
+                                            </div>
+                                            <div className="flex-1 min-w-0 text-left">
+                                                <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                                    {user.user_metadata?.full_name || '마이프로필'}
+                                                </p>
+                                                <p className="text-[11px] text-gray-400 truncate">{user.email}</p>
+                                            </div>
+                                        </button>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <button
+                                            onClick={() => setIsSettingsModalOpen(true)}
+                                            className="w-full flex items-center gap-3 px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-200 rounded-xl transition-colors text-sm font-medium"
+                                        >
+                                            <Settings className="w-5 h-5" />
+                                            <span>설정</span>
+                                        </button>
+                                        <button
+                                            onClick={() => signOut()}
+                                            className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors text-sm font-medium"
+                                        >
+                                            <LogOut className="w-5 h-5" />
+                                            <span>로그아웃</span>
+                                        </button>
+                                    </div>
+                                </>
+                                ) : (
+                                <button
+                                    onClick={() => setIsAuthModalOpen(true)}
+                                    className="w-full flex items-center gap-3 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors text-sm font-bold shadow-lg shadow-indigo-200 dark:shadow-none"
+                                >
+                                    <LogIn className="w-5 h-5" />
+                                    <span>로그인</span>
+                                </button>
                 )}
-            </div>
-        </aside>
-    );
+                            </div>
+                        </aside>
+                        );
 }

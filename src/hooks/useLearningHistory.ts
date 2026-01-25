@@ -11,6 +11,7 @@ interface LearningHistoryState {
     // SRS Actions
     reviewItem: (itemId: string, quality: number) => void;
     getDueItems: () => LearningHistoryItem[];
+    getBookmarkedItems: () => LearningItem[];
 
     toggleMastery: (itemId: string) => void; // Legacy manual override
     toggleBookmark: (itemId: string) => void;
@@ -137,6 +138,20 @@ export const useLearningHistory = create<LearningHistoryState>()(
                     if (item.isMastered) return false;
                     return !item.nextReviewDate || item.nextReviewDate <= now;
                 }).sort((a, b) => (a.nextReviewDate || 0) - (b.nextReviewDate || 0));
+            },
+
+            getBookmarkedItems: () => {
+                return Object.values(get().history)
+                    .filter(item => item.isBookmarked)
+                    .map(historyItem => ({
+                        id: historyItem.itemId,
+                        text: historyItem.text || '',
+                        type: historyItem.type || 'vocab',
+                        meaning: historyItem.meaning || '',
+                        explanation: "저장된 단어입니다.",
+                        reading: historyItem.reading,
+                        jlpt: historyItem.jlpt,
+                    } as LearningItem));
             },
 
             toggleMastery: (itemId) => {
