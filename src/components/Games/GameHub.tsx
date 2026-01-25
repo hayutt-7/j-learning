@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useLearningHistory } from '@/hooks/useLearningHistory';
-import { Target, Zap, Keyboard, Grid3X3, ArrowLeft, Lock, Star } from 'lucide-react';
+import { Target, Zap, Keyboard, Grid3X3, ArrowLeft, Lock, Star, PenTool } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Game imports
@@ -10,8 +10,9 @@ import { QuizGame } from './QuizGame';
 import { MatchingGame } from './MatchingGame';
 import { TypingGame } from './TypingGame';
 import { MemoryGame } from './MemoryGame';
+import { CrosswordGame } from './CrosswordGame';
 
-type GameMode = 'hub' | 'quiz' | 'matching' | 'typing' | 'memory';
+type GameMode = 'hub' | 'quiz' | 'matching' | 'typing' | 'memory' | 'crossword';
 
 interface GameInfo {
     id: GameMode;
@@ -55,6 +56,14 @@ const GAMES: GameInfo[] = [
         color: 'from-pink-500 to-rose-500',
         minWords: 4,
     },
+    {
+        id: 'crossword',
+        title: '무한 십자말풀이',
+        description: '단어장 기반 퍼즐 (Beta)',
+        icon: PenTool,
+        color: 'from-cyan-500 to-blue-500',
+        minWords: 10,
+    },
 ];
 
 export function GameHub() {
@@ -86,6 +95,9 @@ export function GameHub() {
     }
     if (currentGame === 'memory') {
         return <MemoryGame words={bookmarkedWords} onBack={handleBack} />;
+    }
+    if (currentGame === 'crossword') {
+        return <CrosswordGame onBack={handleBack} />;
     }
 
     // Hub view
