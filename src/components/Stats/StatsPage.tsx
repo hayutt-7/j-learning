@@ -10,6 +10,7 @@ import { WeeklyChart } from './WeeklyChart';
 import { DailyGoalsSummary } from './GoalProgress';
 import { MonthlyHeatmap } from './MonthlyHeatmap';
 import { GoalSettingsModal } from './GoalSettingsModal';
+import { AchievementsList } from './AchievementsList';
 import { Trophy, TrendingUp, Activity, Flame, BarChart3, Calendar } from 'lucide-react';
 import { useMemo, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -197,6 +198,11 @@ export function StatsPage() {
                         );
                     })}
                 </div>
+            </div>
+
+            {/* Achievements */}
+            <div className="mb-8">
+                <AchievementsList />
             </div>
 
             {/* Leaderboard Section */}
