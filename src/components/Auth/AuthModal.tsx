@@ -124,10 +124,10 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                                 type="submit"
                                 disabled={loading}
                                 className={cn(
-                                    "w-full py-3 rounded-xl font-bold text-white transition-colors",
+                                    "w-full py-3 rounded-xl font-bold text-white transition-all duration-200 active:scale-95",
                                     loading
                                         ? "bg-indigo-400 cursor-not-allowed"
-                                        : "bg-indigo-600 hover:bg-indigo-700"
+                                        : "bg-indigo-600 hover:bg-indigo-700 shadow-md hover:shadow-lg"
                                 )}
                             >
                                 {loading ? (
@@ -157,7 +157,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                             <div className="space-y-3">
                                 <button
                                     onClick={() => signInWithOAuth('google')}
-                                    className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-medium"
+                                    className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 active:scale-95 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-medium hover:shadow-md"
                                 >
                                     <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden="true">
                                         <path
@@ -181,7 +181,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                                 </button>
                                 <button
                                     onClick={() => signInWithOAuth('kakao')}
-                                    className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-[#FEE500] hover:bg-[#FDD835] rounded-xl transition-colors text-[#000000] font-medium border border-[#FEE500]"
+                                    className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-[#FEE500] hover:bg-[#FDD835] rounded-xl transition-all duration-200 active:scale-95 text-[#000000] font-medium border border-[#FEE500] hover:shadow-md"
                                 >
                                     <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden="true">
                                         <path
