@@ -167,6 +167,7 @@ export default function Home() {
   const hasMessages = messages.length > 0;
 
   return (
+  return (
     <AppShell
       currentView={currentView}
       onViewChange={setCurrentView}
@@ -176,12 +177,13 @@ export default function Home() {
       onDeleteSession={handleDeleteSession}
     >
       {currentView === 'translate' && (
-        <div className="flex flex-col h-[calc(100vh-80px)] relative">
+        <div className="flex flex-col h-full relative">
           {/* Chat Messages Area */}
           <div
             ref={scrollContainerRef}
             className={`flex-1 overflow-y-auto px-4 py-6 ${!hasMessages ? 'flex items-center justify-center' : ''}`}
           >
+            {/* ... rest of chat messages content ... */}
             {!hasMessages && !isLoading ? (
               /* Welcome Screen - Centered */
               <div className="text-center max-w-2xl mx-auto animate-in fade-in duration-700">
@@ -256,15 +258,11 @@ export default function Home() {
         </div>
       )}
 
-      import {SpeakingStudy} from '@/components/Speaking/SpeakingStudy';
-      // ... (imports)
-
-      // ...
-
       {currentView === 'vocab' && <VocabStudy />}
       {currentView === 'song' && <ContentStudy />}
       {currentView === 'speaking' && <SpeakingStudy />}
       {currentView === 'stats' && <StatsPage />}
     </AppShell>
+
   );
 }

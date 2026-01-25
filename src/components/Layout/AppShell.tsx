@@ -48,11 +48,11 @@ export function AppShell({ children, currentView = 'translate', onViewChange = (
     }, [user, syncWithSupabase]);
 
     return (
-        <div className="flex min-h-screen bg-[#FDFDFD] dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans selection:bg-indigo-100 selection:text-indigo-900 transition-colors duration-300">
+        <div className="flex h-[100dvh] w-full overflow-hidden bg-[#FDFDFD] dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans selection:bg-indigo-100 selection:text-indigo-900 transition-colors duration-300">
             <UserSync />
 
             {/* Desktop Sidebar */}
-            <div className="hidden lg:block fixed inset-y-0 left-0 z-50">
+            <div className="hidden lg:block fixed inset-y-0 left-0 z-50 w-64">
                 <Sidebar
                     currentView={currentView}
                     onViewChange={onViewChange}
@@ -84,8 +84,8 @@ export function AppShell({ children, currentView = 'translate', onViewChange = (
             <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} />
             <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
 
-            <main className="flex-1 lg:pl-64 pt-20 lg:pt-0 pb-20 lg:pb-0 min-h-screen">
-                <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8 h-full">
+            <main className="flex-1 lg:pl-64 flex flex-col h-full w-full overflow-hidden pt-16 pb-16 lg:py-0">
+                <div className="w-full max-w-7xl mx-auto px-4 lg:px-8 py-4 lg:py-8 h-full flex flex-col overflow-hidden">
                     {children}
                 </div>
             </main>
