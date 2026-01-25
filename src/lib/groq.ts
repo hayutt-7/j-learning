@@ -63,6 +63,11 @@ Response Format (JSON only, no markdown):
 
     const responseText = chatCompletion.choices[0]?.message?.content || "{}";
     const data = JSON.parse(responseText) as AnalysisResult;
+
+    if (!data.translatedText || data.translatedText.trim() === "") {
+      throw new Error("Invalid response from Groq: Missing translatedText");
+    }
+
     return data;
   } catch (error) {
     console.error("Groq Analysis Error:", error);

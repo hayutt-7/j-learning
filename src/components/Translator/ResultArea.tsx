@@ -36,7 +36,7 @@ export function ResultArea({ result, isLoading, onChatClick }: ResultAreaProps) 
         <div className="group relative mt-6 overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-sm ring-1 ring-gray-100 dark:ring-gray-700 transition-all">
             <div className="flex items-start justify-between gap-4">
                 <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 leading-relaxed font-sans flex flex-wrap gap-x-1 gap-y-2 flex-1">
-                    {result.tokens ? (
+                    {result.tokens && result.tokens.length > 0 ? (
                         result.tokens.map((token, idx) => (
                             <span key={idx} className="inline-block">
                                 {token.reading ? (

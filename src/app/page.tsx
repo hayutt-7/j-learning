@@ -30,6 +30,13 @@ export default function Home() {
     try {
       const data = await translateAndAnalyze(text);
       setResult(data);
+
+      // Record exposures (React Best Practice: Side Effects in Event Handlers)
+      if (data.items && data.items.length > 0) {
+        import('@/hooks/useLearningHistory').then(({ useLearningHistory }) => {
+          useLearningHistory.getState().recordExposures(data.items);
+        });
+      }
     } catch (err: any) {
       console.error("Analysis failed", err);
       setError(err.message || "번역 서비스에 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");

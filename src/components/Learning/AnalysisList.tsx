@@ -11,22 +11,17 @@ interface AnalysisListProps {
 }
 
 export function AnalysisList({ items }: AnalysisListProps) {
-    const { shouldHide, recordExposure } = useLearningHistory();
+    const { shouldHide } = useLearningHistory();
     const [showHidden, setShowHidden] = useState(false);
 
-    // Record exposure only once when items are loaded
-    useEffect(() => {
-        items.forEach(item => {
-            recordExposure(item);
-        });
-    }, [items, recordExposure]);
+    // React Best Practice: No side-effects (exposure recording) in render/effect
 
+    // Pure derived state
     const { visibleItems, hiddenItems } = useMemo(() => {
         const visible: LearningItem[] = [];
         const hidden: LearningItem[] = [];
 
         items.forEach(item => {
-            // Logic: If shouldHide is true, track as hidden.
             if (shouldHide(item.id)) {
                 hidden.push(item);
             } else {

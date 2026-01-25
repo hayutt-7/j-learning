@@ -7,6 +7,7 @@ interface LearningHistoryState {
 
     // Actions
     recordExposure: (item: LearningItem) => void;
+    recordExposures: (items: LearningItem[]) => void;
     // SRS Actions
     reviewItem: (itemId: string, quality: number) => void;
     getDueItems: () => LearningHistoryItem[];
@@ -23,45 +24,52 @@ export const useLearningHistory = create<LearningHistoryState>()(
             history: {},
 
             recordExposure: (item) => {
+                get().recordExposures([item]);
+            },
+
+            recordExposures: (items) => {
                 set((state) => {
-                    const current = state.history[item.id];
+                    const newHistory = { ...state.history };
+                    const now = Date.now();
+                    let hasChanges = false;
 
-                    // If it's a new item, initialize SRS defaults
-                    if (!current) {
-                        return {
-                            history: {
-                                ...state.history,
-                                [item.id]: {
-                                    itemId: item.id,
-                                    text: item.text,
-                                    type: item.type,
-                                    meaning: item.meaning,
-                                    jlpt: item.jlpt,
-                                    reading: item.reading,
-                                    exposureCount: 1,
-                                    lastSeenAt: Date.now(),
-                                    isMastered: false,
-                                    // SRS Defaults
-                                    easeFactor: 2.5,
-                                    interval: 0,
-                                    repetitions: 0,
-                                    nextReviewDate: Date.now(), // Due immediately
-                                },
-                            },
-                        };
-                    }
+                    items.forEach(item => {
+                        const current = newHistory[item.id];
 
-                    // Existing item exposed again contextually (not a formal review)
-                    return {
-                        history: {
-                            ...state.history,
-                            [item.id]: {
+                        // Prevent duplicates within short timeframe (debounce 2s)
+                        if (current && (now - current.lastSeenAt < 2000)) {
+                            return;
+                        }
+
+                        hasChanges = true;
+
+                        if (!current) {
+                            newHistory[item.id] = {
+                                itemId: item.id,
+                                text: item.text,
+                                type: item.type,
+                                meaning: item.meaning,
+                                jlpt: item.jlpt,
+                                reading: item.reading,
+                                exposureCount: 1,
+                                lastSeenAt: now,
+                                isMastered: false,
+                                // SRS Defaults
+                                easeFactor: 2.5,
+                                interval: 0,
+                                repetitions: 0,
+                                nextReviewDate: now,
+                            };
+                        } else {
+                            newHistory[item.id] = {
                                 ...current,
                                 exposureCount: current.exposureCount + 1,
-                                lastSeenAt: Date.now(),
-                            },
-                        },
-                    };
+                                lastSeenAt: now,
+                            };
+                        }
+                    });
+
+                    return hasChanges ? { history: newHistory } : state;
                 });
             },
 
@@ -147,8 +155,8 @@ export const useLearningHistory = create<LearningHistoryState>()(
             shouldHide: (itemId) => {
                 const item = get().history[itemId];
                 if (!item) return false;
-                // Hide if mastered OR exposed 3+ times
-                return item.isMastered || item.exposureCount >= 3;
+                // Only hide if explicitly mastered
+                return item.isMastered;
             },
 
             syncWithSupabase: async (user: any) => { // User type explicit import avoided to reduce dependency complexity for now or use generic
