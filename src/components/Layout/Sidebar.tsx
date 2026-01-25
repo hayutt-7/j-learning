@@ -8,7 +8,7 @@ import { ChatSession, getSessions, deleteSession } from '@/lib/chat-service';
 import { AuthModal } from '@/components/Auth/AuthModal';
 import { ProfileModal } from '@/components/Profile/ProfileModal';
 
-export type ViewMode = 'translate' | 'vocab' | 'song' | 'stats' | 'speaking';
+export type ViewMode = 'translate' | 'vocab' | 'games' | 'song' | 'stats';
 
 interface SidebarProps {
     currentView: ViewMode;
@@ -65,7 +65,7 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
     const menuItems = [
         { id: 'translate', label: '작문/번역', icon: Type },
         { id: 'vocab', label: '단어 암기', icon: Brain },
-        { id: 'speaking', label: '회화 연습 (New)', icon: Mic },
+        { id: 'games', label: '단어 게임', icon: Star },
         { id: 'song', label: '콘텐츠 학습', icon: ScrollText },
         { id: 'stats', label: '학습 통계', icon: BarChart3 },
     ];
@@ -188,9 +188,11 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
                                 <p className="text-[11px] text-gray-400 truncate">{user.email}</p>
                             </div>
                         </button>
+                        <div className="h-8 w-[1px] bg-gray-200 dark:bg-gray-700 mx-1" />
+
                         <button
                             onClick={() => signOut()}
-                            className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors shrink-0"
+                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors shrink-0"
                             title="로그아웃"
                         >
                             <LogOut className="w-4 h-4" />

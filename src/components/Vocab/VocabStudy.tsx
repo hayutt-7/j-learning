@@ -148,9 +148,14 @@ export function VocabStudy() {
         }
 
         // Auto advance to next card after short delay
-        if (autoAdvance && currentIndex < cards.length - 1) {
+        if (autoAdvance) {
             setTimeout(() => {
-                setCurrentIndex(prev => prev + 1);
+                if (currentIndex < cards.length - 1) {
+                    setCurrentIndex(prev => prev + 1);
+                } else {
+                    // Last card finished - show completion modal
+                    setShowExitModal(true);
+                }
             }, 300);
         }
     };

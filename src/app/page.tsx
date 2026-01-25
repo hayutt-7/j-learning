@@ -8,7 +8,7 @@ import { ChatMessage } from '@/components/Translator/ChatMessage';
 import { VocabStudy } from '@/components/Vocab/VocabStudy';
 import { ContentStudy } from '@/components/Content/ContentStudy';
 import { StatsPage } from '@/components/Stats/StatsPage';
-import { SpeakingStudy } from '@/components/Speaking/SpeakingStudy';
+import { GameHub } from '@/components/Games/GameHub';
 
 import { createSession, getMessages, saveMessage } from '@/lib/chat-service';
 import { useAuth } from '@/hooks/useAuth';
@@ -259,7 +259,7 @@ export default function Home() {
 
       {currentView === 'vocab' && <VocabStudy />}
       {currentView === 'song' && <ContentStudy />}
-      {currentView === 'speaking' && <SpeakingStudy />}
+      {currentView === 'games' && <GameHub />}
       {currentView === 'stats' && <StatsPage />}
     </AppShell>
 
