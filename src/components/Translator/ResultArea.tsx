@@ -3,6 +3,7 @@ import { AnalysisResult } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { TokenTooltip } from './TokenTooltip';
+import { useLearningHistory } from '@/hooks/useLearningHistory';
 
 interface ResultAreaProps {
     result: AnalysisResult;
