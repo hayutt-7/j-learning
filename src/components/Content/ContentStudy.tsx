@@ -164,18 +164,18 @@ export function ContentStudy() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mt-8">
-                <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-center">
-                    <Music className="w-6 h-6 text-pink-500 mx-auto mb-2" />
-                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400">J-POP 가사</span>
+            <div className="grid grid-cols-3 gap-4 mt-12 mb-8">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-center hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all cursor-pointer border border-transparent hover:border-pink-100 dark:hover:border-pink-900/30 group">
+                    <Music className="w-6 h-6 text-pink-500 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">J-POP 가사</span>
                 </div>
-                <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-center">
-                    <Video className="w-6 h-6 text-purple-500 mx-auto mb-2" />
-                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400">애니/드라마 대사</span>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-center hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all cursor-pointer border border-transparent hover:border-purple-100 dark:hover:border-purple-900/30 group">
+                    <Video className="w-6 h-6 text-purple-500 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">애니/드라마 대사</span>
                 </div>
-                <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-center">
-                    <BookOpen className="w-6 h-6 text-indigo-500 mx-auto mb-2" />
-                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400">뉴스/소설</span>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-center hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all cursor-pointer border border-transparent hover:border-indigo-100 dark:hover:border-indigo-900/30 group">
+                    <BookOpen className="w-6 h-6 text-indigo-500 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">뉴스/소설</span>
                 </div>
             </div>
         </div>

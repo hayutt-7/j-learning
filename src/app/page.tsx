@@ -9,6 +9,7 @@ import { VocabStudy } from '@/components/Vocab/VocabStudy';
 import { ContentStudy } from '@/components/Content/ContentStudy';
 import { StatsPage } from '@/components/Stats/StatsPage';
 import { GameHub } from '@/components/Games/GameHub';
+import { DictionaryStudy } from '@/components/Dictionary/DictionaryStudy';
 
 import { createSession, getMessages, saveMessage } from '@/lib/chat-service';
 import { useAuth } from '@/hooks/useAuth';
@@ -102,6 +103,7 @@ export default function Home() {
 
   const handleSessionSelect = (sessionId: string) => {
     loadSessionMessages(sessionId);
+    setCurrentView('translate');
   };
 
   const handleDeleteSession = (sessionId: string) => {
@@ -260,6 +262,7 @@ export default function Home() {
       {currentView === 'vocab' && <VocabStudy />}
       {currentView === 'song' && <ContentStudy />}
       {currentView === 'games' && <GameHub />}
+      {currentView === 'dictionary' && <DictionaryStudy />}
       {currentView === 'stats' && <StatsPage />}
     </AppShell>
 

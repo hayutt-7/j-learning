@@ -1,6 +1,6 @@
 'use client';
 
-import { GraduationCap, Brain, Type, BarChart3, Settings, LogOut, LayoutDashboard, Music, MessageSquare, Plus, Trash2, ScrollText, Star, LogIn, Mic, User, ChevronRight } from 'lucide-react';
+import { GraduationCap, Brain, Type, BarChart3, Settings, LogOut, LayoutDashboard, Music, MessageSquare, Plus, Trash2, ScrollText, Star, LogIn, Mic, User, ChevronRight, Book } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState, useRef } from 'react';
@@ -9,7 +9,7 @@ import { AuthModal } from '@/components/Auth/AuthModal';
 import { ProfileModal } from '@/components/Profile/ProfileModal';
 import { SettingsModal } from '@/components/Settings/SettingsModal';
 
-export type ViewMode = 'translate' | 'vocab' | 'song' | 'stats' | 'speaking';
+export type ViewMode = 'translate' | 'vocab' | 'song' | 'stats' | 'speaking' | 'dictionary' | 'games';
 
 interface SidebarProps {
     currentView: ViewMode;
@@ -69,6 +69,7 @@ export function Sidebar({ currentView, onViewChange, currentSessionId, onSession
         { id: 'vocab', label: '단어 암기', icon: Brain },
         { id: 'games', label: '단어 게임', icon: Star },
         { id: 'song', label: '콘텐츠 학습', icon: ScrollText },
+        { id: 'dictionary', label: '일본어 사전', icon: Book },
         { id: 'stats', label: '학습 통계', icon: BarChart3 },
     ];
 
