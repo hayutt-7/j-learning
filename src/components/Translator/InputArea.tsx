@@ -46,11 +46,11 @@ export function InputArea({ onTranslate, isLoading }: InputAreaProps) {
                     disabled={isLoading}
                     rows={1}
                 />
-                <div className="absolute bottom-2 right-2">
+                <div className="absolute bottom-1.5 right-1.5">
                     <button
                         type="submit"
                         disabled={!input.trim() || isLoading}
-                        className="inline-flex items-center justify-center rounded-xl bg-indigo-600 dark:bg-indigo-600 p-2.5 text-white shadow-sm hover:bg-indigo-500 dark:hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95"
+                        className="inline-flex items-center justify-center rounded-xl bg-indigo-600 dark:bg-indigo-600 p-2 text-white shadow-sm hover:bg-indigo-500 dark:hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95"
                     >
                         <SendHorizontal className="h-5 w-5" />
                     </button>

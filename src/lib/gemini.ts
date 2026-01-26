@@ -34,16 +34,14 @@ Requirements:
    - **JLPT**: Estimate JLPT level (N5-N1).
    - **Pitch Accent**: Provide pitch accent if possible.
    - **Explanation**: Explain in KOREAN.
+   - **IMPORTANT**: You MUST extract at least one item (vocab or grammar) from the sentence.
 
 Response Format (JSON only):
 {
-  "translatedText": "string",
+  "translatedText": "Japanese translation",
   "tokens": [
     { "text": "私", "reading": "わたし", "romaji": "watashi" },
-    { "text": "は", "reading": "", "romaji": "wa" },
-    { "text": "日本語", "reading": "にほんご", "romaji": "nihongo" },
-    { "text": "を", "reading": "", "romaji": "wo" },
-    { "text": "勉強", "reading": "べんきょう", "romaji": "benkyou" }
+    { "text": "は", "reading": "", "romaji": "wa" }
   ],
   "items": [
     {
@@ -51,7 +49,7 @@ Response Format (JSON only):
       "text": "word",
       "type": "vocab",
       "meaning": "Korean meaning",
-      "reading": "reading in hiragana",
+      "reading": "hiragana",
       "explanation": "Korean explanation",
       "nuance": "nuance",
       "jlpt": "N5",
