@@ -19,12 +19,11 @@ export function StatsPage() {
     const { history, resetHistory } = useLearningHistory();
     const { level, currentXp, nextLevelXp, streak, resetProgress } = useUserProgress();
     const { user } = useAuth();
-    const dailyGoals = useDailyGoals();
-    const studyLog = useStudyLog();
     const [showGoalSettings, setShowGoalSettings] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
-    // Reset daily goals if new day
     useEffect(() => {
+        setMounted(true);
         dailyGoals.resetIfNewDay();
     }, []);
 
@@ -43,6 +42,8 @@ export function StatsPage() {
     };
 
     const stats = useMemo(() => {
+        if (!mounted) return { total: 0, mastered: 0, jlptCounts: {}, studiedToday: 0 };
+
         const items = Object.values(history);
         const total = items.length;
         const mastered = items.filter(i => i.isMastered).length;
@@ -57,11 +58,19 @@ export function StatsPage() {
         const studiedToday = items.filter(i => i.lastSeenAt >= today).length;
 
         return { total, mastered, jlptCounts, studiedToday };
-    }, [history]);
+    }, [history, mounted]);
+
+    if (!mounted) {
+        return <div className="max-w-3xl mx-auto py-8 px-4 animate-pulse">
+            <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-1/3 mb-8"></div>
+            <div className="h-40 bg-gray-200 dark:bg-gray-800 rounded-2xl mb-8"></div>
+            <div className="h-64 bg-gray-200 dark:bg-gray-800 rounded-2xl mb-8"></div>
+        </div>;
+    }
 
     const xpProgress = nextLevelXp > 0 ? (currentXp / nextLevelXp) * 100 : 0;
-    const weeklyData = studyLog.getWeeklyData();
-    const monthlyData = studyLog.getMonthlyData();
+    const weeklyData = studyLog.getWeeklyData() || [];
+    const monthlyData = studyLog.getMonthlyData() || [];
     const goalProgress = dailyGoals.getProgress();
 
     return (
@@ -131,7 +140,11 @@ export function StatsPage() {
                     <Calendar className="w-5 h-5 text-emerald-600" />
                     <h3 className="font-bold text-gray-900 dark:text-white text-lg">월간 학습 기록</h3>
                 </div>
-                <MonthlyHeatmap data={monthlyData} />
+                {monthlyData && monthlyData.length > 0 ? (
+                    <MonthlyHeatmap data={monthlyData} />
+                ) : (
+                    <div className="text-center py-8 text-gray-400 text-sm">기록된 데이터가 없습니다.</div>
+                )}
             </div>
 
             {/* Stats Grid */}
