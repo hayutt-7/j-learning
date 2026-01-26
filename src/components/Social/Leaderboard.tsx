@@ -16,7 +16,10 @@ interface LeaderboardEntry {
 }
 
 export function Leaderboard() {
+    const { user } = useAuth();
     const [myProfile, setMyProfile] = useState<LeaderboardEntry | null>(null);
+    const [leaders, setLeaders] = useState<LeaderboardEntry[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         fetchLeaderboard();
