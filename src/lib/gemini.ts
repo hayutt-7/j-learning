@@ -76,7 +76,7 @@ Response Format (JSON only):
     return data;
   } catch (error) {
     console.error("Gemini Analysis Error:", error);
-    throw new Error("Failed to analyze text with Gemini");
+    throw new Error(`Failed to analyze text with Gemini: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
