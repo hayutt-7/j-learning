@@ -9,7 +9,17 @@ export async function translateAndAnalyze(text: string): Promise<AnalysisResult>
     }
 
     try {
-        return await analyzeJapaneseWithGroq(text);
+        const result = await analyzeJapaneseWithGroq(text);
+
+        // Fix: Ensure unique IDs for items to prevent collision with previously mastered items
+        if (result.items) {
+            result.items = result.items.map(item => ({
+                ...item,
+                id: crypto.randomUUID()
+            }));
+        }
+
+        return result;
     } catch (error: any) {
         console.error("Translation error:", error);
         // Returning the error as data to bypass Next.js production error masking
@@ -34,7 +44,16 @@ export async function analyzeContent(text: string): Promise<AnalysisResult[]> {
     if (!text.trim()) throw new Error("Text is required");
 
     try {
-        return await analyzeLongTextWithGroq(text);
+        const results = await analyzeLongTextWithGroq(text);
+
+        // Fix: Ensure unique IDs for all items
+        return results.map(result => ({
+            ...result,
+            items: (result.items || []).map(item => ({
+                ...item,
+                id: crypto.randomUUID()
+            }))
+        }));
     } catch (error) {
         console.error("Content analysis error:", error);
         // Fallback: Treat as single sentence or return error

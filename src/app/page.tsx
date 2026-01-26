@@ -32,6 +32,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [currentContext, setCurrentContext] = useState('');
+  const [lastInputText, setLastInputText] = useState('');
 
   // Chat History State
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
@@ -115,6 +116,7 @@ export default function Home() {
   const handleTranslate = async (text: string) => {
     setIsLoading(true);
     setError(null);
+    setLastInputText(text);
 
     // Optimistic UI update
     const tempId = Date.now().toString();
@@ -238,8 +240,15 @@ export default function Home() {
 
                 {/* Error Message */}
                 {error && (
-                  <div className="max-w-2xl mx-auto p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-center">
-                    <p className="text-red-600 dark:text-red-400 font-medium">{error}</p>
+                  <div className="max-w-2xl mx-auto p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-center animate-in fade-in slide-in-from-top-2">
+                    <p className="text-red-600 dark:text-red-400 font-medium mb-3">{error}</p>
+                    <button
+                      onClick={() => handleTranslate(lastInputText)}
+                      disabled={isLoading}
+                      className="px-4 py-2 bg-white dark:bg-gray-800 border border-red-100 dark:border-red-900 shadow-sm rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                    >
+                      다시 시도
+                    </button>
                   </div>
                 )}
 
