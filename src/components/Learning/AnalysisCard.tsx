@@ -4,6 +4,7 @@ import { Check, BookOpen, ALargeSmall, Star } from 'lucide-react';
 import { LearningItem } from '@/lib/types';
 import { useLearningHistory } from '@/hooks/useLearningHistory';
 import { cn } from '@/lib/utils';
+import { translatePitchAccent } from '@/lib/pitch-accent';
 import { useState } from 'react';
 
 interface AnalysisCardProps {
@@ -121,7 +122,7 @@ export function AnalysisCard({ item }: AnalysisCardProps) {
                         {item.pitchAccent && (
                             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-50/80 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg text-xs font-semibold text-gray-600 dark:text-gray-400">
                                 <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                                {item.pitchAccent}
+                                {translatePitchAccent(item.pitchAccent)}
                             </div>
                         )}
                         {item.nuance && (
