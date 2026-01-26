@@ -150,9 +150,7 @@ export function AnalysisList({ items }: AnalysisListProps) {
                 viewMode === 'carousel' ? (
                     /* Carousel View */
                     <div className="relative group">
-                        <div className="mb-3 flex items-center justify-between text-xs font-medium text-gray-400 dark:text-gray-500 px-1">
-                            <span className="hidden sm:inline">← → 또는 스와이프로 이동</span>
-                            <span className="sm:hidden">스와이프로 이동</span>
+                        <div className="mb-3 flex items-center justify-end text-xs font-medium px-1">
                             <span className="font-bold text-indigo-500">{currentIndex + 1} / {visibleItems.length}</span>
                         </div>
 
@@ -230,14 +228,7 @@ export function AnalysisList({ items }: AnalysisListProps) {
                                 <AnalysisCard item={currentItem} />
                             </div>
 
-                            {/* Next card preview hint (desktop only) */}
-                            {currentIndex < visibleItems.length - 1 && (
-                                <div className="absolute top-0 -right-6 w-12 h-full hidden xl:block pointer-events-none overflow-hidden opacity-30">
-                                    <div className="scale-95 origin-left">
-                                        <AnalysisCard item={visibleItems[currentIndex + 1]} />
-                                    </div>
-                                </div>
-                            )}
+
                         </div>
                     </div>
                 ) : (

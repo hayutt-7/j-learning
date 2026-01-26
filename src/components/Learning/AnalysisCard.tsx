@@ -6,6 +6,7 @@ import { useLearningHistory } from '@/hooks/useLearningHistory';
 import { cn } from '@/lib/utils';
 import { translatePitchAccent } from '@/lib/pitch-accent';
 import { useState } from 'react';
+import { ExampleWithTooltip } from './ExampleWithTooltip';
 
 interface AnalysisCardProps {
     item: LearningItem;
@@ -139,9 +140,7 @@ export function AnalysisCard({ item }: AnalysisCardProps) {
                         <span className="font-bold text-gray-400 dark:text-gray-600 block mb-3 text-[10px] uppercase tracking-widest">Examples</span>
                         <ul className="space-y-3">
                             {item.examples.map((ex, idx) => (
-                                <li key={idx} className="text-[14px] text-gray-600 dark:text-gray-400 pl-4 border-l-[3px] border-indigo-100 dark:border-indigo-900 py-0.5 leading-relaxed">
-                                    {ex}
-                                </li>
+                                <ExampleWithTooltip key={idx} japaneseText={ex} index={idx} />
                             ))}
                         </ul>
                     </div>
