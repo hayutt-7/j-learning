@@ -133,7 +133,7 @@ export function ContentStudy() {
                             <textarea
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
-                                placeholder="분석하고 싶은 일본어 가사나 문장을 여기에 붙여넣으세요..."
+                                placeholder="일본어 가사나 문장을 붙여넣으세요. (한국어 번역이나 발음이 섞여 있어도 AI가 일본어만 분석합니다!)"
                                 className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:border-indigo-500 focus:outline-none transition-colors h-64 resize-none text-base leading-relaxed"
                             />
                         </div>

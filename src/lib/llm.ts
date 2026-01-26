@@ -143,22 +143,23 @@ export async function analyzeLongTextWithGroq(contextText: string): Promise<Anal
     }
 
     const prompt = `
-You are a Japanese language tutor.
-Analyze the following text (lyrics, script, etc.).
-Split the text into meaningful sentences or lines (if it's lyrics, keep the lines).
-For EACH line/sentence, provide a detailed analysis in the specified JSON format.
+    You are a Japanese language tutor.
+    Analyze the following text (lyrics, script, etc.).
+    The input text differs from standard text: it contains mixed lines of Japanese, phonetics (Hangul/Romaji), and Korean translations.
+    
+    YOUR GOAL: Extract ONLY the Japanese lines/sentences and analyze them. IGNORE purely Korean lines or phonetic guides.
 
-Input Text:
-"""
-${contextText}
-"""
-
-Requirements:
-1. **Split**: Break down the text line by line.
-2. **Translation**: Korean translation for each line.
-3. **Analysis**: For each line, provide tokens and key items (vocab/grammar).
-   - "tokens": Break down into words. "reading" MUST be HIRAGANA.
-   - "items": Extract detailed vocab/grammar points.
+    Input Text:
+    """
+    ${contextText}
+    """
+    
+    Requirements:
+    1. **Filter & Split**: Identify lines that are primarily Japanese (Kanji, Hiragana, Katakana). IGNORE lines that are purely Korean, English, or Phonetics.
+    2. **Translation**: Korean translation for each extracted Japanese line.
+    3. **Analysis**: For each line, provide tokens and key items (vocab/grammar).
+       - "tokens": Break down into words. "reading" MUST be HIRAGANA.
+       - "items": Extract detailed vocab/grammar points.
 
 Response Format (JSON Array of Objects):
 [
