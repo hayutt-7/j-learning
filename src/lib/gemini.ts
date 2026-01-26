@@ -12,7 +12,6 @@ export async function analyzeJapaneseWithGemini(koreanText: string): Promise<Ana
 
   const model = genAI.getGenerativeModel({
     model: "gemini-pro",
-    generationConfig: { responseMimeType: "application/json" }
   });
 
   const prompt = `
@@ -63,7 +62,10 @@ Response Format (JSON only):
   try {
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
-    const data = JSON.parse(responseText) as AnalysisResult;
+
+    // Clean markdown code blocks if present
+    const cleanedText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+    const data = JSON.parse(cleanedText) as AnalysisResult;
 
     if (!data.translatedText || data.translatedText.trim() === "") {
       throw new Error("Invalid response from Gemini: Missing translatedText");
@@ -123,7 +125,6 @@ export async function analyzeLongTextWithGemini(contextText: string): Promise<An
 
   const model = genAI.getGenerativeModel({
     model: "gemini-pro",
-    generationConfig: { responseMimeType: "application/json" }
   });
 
   const prompt = `
@@ -162,7 +163,9 @@ Response Format (JSON Array of Objects):
   try {
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
-    const data = JSON.parse(responseText) as AnalysisResult[];
+
+    const cleanedText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+    const data = JSON.parse(cleanedText) as AnalysisResult[];
 
     if (!Array.isArray(data)) {
       throw new Error("Invalid response format: Expected array");
