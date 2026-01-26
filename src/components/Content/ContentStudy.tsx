@@ -88,132 +88,131 @@ export function ContentStudy() {
 
     if (results) {
         return (
-            <div className="flex-none flex items-center justify-between gap-4 mb-6">
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={handleReset}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-500"
-                    >
-                        <ArrowLeft className="w-6 h-6" />
-                    </button>
-                    <div>
-                        <h1 className="text-xl font-bold text-gray-900 dark:text-white leading-tight line-clamp-1">
-                            {title || '콘텐츠 학습'}
-                        </h1>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {results.length}개의 문장 분석 완료
-                        </p>
-                    </div>
-                </div>
-
-                {/* View Mode Toggle */}
-                <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg shrink-0">
-                    <button
-                        onClick={() => setViewMode('FOCUS')}
-                        className={cn(
-                            "p-2 rounded-md transition-all",
-                            viewMode === 'FOCUS' ? "bg-white dark:bg-gray-700 text-indigo-600 shadow-sm" : "text-gray-400"
-                        )}
-                        title="집중 모드 (하나씩 보기)"
-                    >
-                        <ScrollText className="w-4 h-4" /> {/* Focus Icon */}
-                    </button>
-                    <button
-                        onClick={() => setViewMode('LIST')}
-                        className={cn(
-                            "p-2 rounded-md transition-all",
-                            viewMode === 'LIST' ? "bg-white dark:bg-gray-700 text-indigo-600 shadow-sm" : "text-gray-400"
-                        )}
-                        title="리스트 모드 (전체 보기)"
-                    >
-                        <FileText className="w-4 h-4" /> {/* List Icon */}
-                    </button>
-                </div>
-            </div>
-
-                {
-            viewMode === 'FOCUS' ? (
-                <div className="flex-1 flex flex-col min-h-0 relative">
-                    {/* Focus/Carousel View */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar px-1 pb-20">
-                        {/* Navigation Bar */}
-                        <div className="sticky top-0 z-10 bg-gray-50/95 dark:bg-black/95 backdrop-blur-sm pb-4 flex items-center justify-between mb-2">
-                            <button
-                                onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
-                                disabled={currentIndex === 0}
-                                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 disabled:opacity-30 transition-all text-gray-600 dark:text-gray-400"
-                            >
-                                <ArrowLeft className="w-6 h-6" />
-                            </button>
-                            <span className="font-bold text-indigo-600 dark:text-indigo-400 text-lg">
-                                {currentIndex + 1} <span className="text-gray-400 text-sm">/ {results.length}</span>
-                            </span>
-                            <button
-                                onClick={() => setCurrentIndex(prev => Math.min(results.length - 1, prev + 1))}
-                                disabled={currentIndex === results.length - 1}
-                                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 disabled:opacity-30 transition-all text-gray-600 dark:text-gray-400"
-                            >
-                                {currentIndex === results.length - 1 ? (
-                                    <CheckCircle2 className="w-6 h-6 text-green-500" />
-                                ) : (
-                                    <ArrowLeft className="w-6 h-6 rotate-180" />
-                                )}
-                            </button>
-                        </div>
-
-                        {/* Current Sentence Card */}
-                        <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 shadow-md animate-in fade-in slide-in-from-right-4 duration-300" key={currentIndex}>
-                            <div className="mb-8">
-                                <ResultArea result={results[currentIndex]} />
-                                <p className="mt-4 text-gray-600 dark:text-gray-300 text-xl leading-relaxed font-medium text-center">
-                                    {results[currentIndex].translatedText}
-                                </p>
-                            </div>
-
-                            {results[currentIndex].items && results[currentIndex].items.length > 0 && (
-                                <div className="pt-6 border-t border-gray-100 dark:border-gray-800">
-                                    <AnalysisList items={results[currentIndex].items} />
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            ) : (
-            <div className="flex-1 overflow-y-auto min-h-0 pb-20 pl-4 pr-6 custom-scrollbar space-y-8"> {/* Increased left padding for indices */}
-                {results.map((result, idx) => (
-                    <div key={idx} className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm relative group">
-                        <div className="absolute -left-3 top-6 w-6 h-6 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center text-xs font-bold text-indigo-600 dark:text-indigo-400 border border-white dark:border-gray-900 shadow-sm z-10">
-                            {idx + 1}
-                        </div>
-
-                        <div className="mb-6 pl-4">
-                            <ResultArea result={result} />
-                            <p className="mt-3 text-gray-600 dark:text-gray-400 text-lg leading-relaxed font-medium">
-                                {result.translatedText}
+            <div className="flex flex-col h-full max-w-3xl mx-auto px-4 py-6">
+                <div className="flex-none flex items-center justify-between gap-4 mb-6">
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={handleReset}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-500"
+                        >
+                            <ArrowLeft className="w-6 h-6" />
+                        </button>
+                        <div>
+                            <h1 className="text-xl font-bold text-gray-900 dark:text-white leading-tight line-clamp-1">
+                                {title || '콘텐츠 학습'}
+                            </h1>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {results.length}개의 문장 분석 완료
                             </p>
                         </div>
-
-                        {/* Analysis List */}
-                        {result.items && result.items.length > 0 && (
-                            <div className="pl-4 border-l-2 border-gray-100 dark:border-gray-800">
-                                <AnalysisList items={result.items} />
-                            </div>
-                        )}
                     </div>
-                ))}
 
-                <div className="text-center pt-8 pb-4">
-                    <button
-                        onClick={handleReset}
-                        className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 dark:shadow-none"
-                    >
-                        다른 콘텐츠 학습하기
-                    </button>
+                    {/* View Mode Toggle */}
+                    <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg shrink-0">
+                        <button
+                            onClick={() => setViewMode('FOCUS')}
+                            className={cn(
+                                "p-2 rounded-md transition-all",
+                                viewMode === 'FOCUS' ? "bg-white dark:bg-gray-700 text-indigo-600 shadow-sm" : "text-gray-400"
+                            )}
+                            title="집중 모드 (하나씩 보기)"
+                        >
+                            <ScrollText className="w-4 h-4" /> {/* Focus Icon */}
+                        </button>
+                        <button
+                            onClick={() => setViewMode('LIST')}
+                            className={cn(
+                                "p-2 rounded-md transition-all",
+                                viewMode === 'LIST' ? "bg-white dark:bg-gray-700 text-indigo-600 shadow-sm" : "text-gray-400"
+                            )}
+                            title="리스트 모드 (전체 보기)"
+                        >
+                            <FileText className="w-4 h-4" /> {/* List Icon */}
+                        </button>
+                    </div>
                 </div>
+
+                {viewMode === 'FOCUS' ? (
+                    <div className="flex-1 flex flex-col min-h-0 relative">
+                        {/* Focus/Carousel View */}
+                        <div className="flex-1 overflow-y-auto custom-scrollbar px-1 pb-20">
+                            {/* Navigation Bar */}
+                            <div className="sticky top-0 z-10 bg-gray-50/95 dark:bg-black/95 backdrop-blur-sm pb-4 flex items-center justify-between mb-2">
+                                <button
+                                    onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
+                                    disabled={currentIndex === 0}
+                                    className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 disabled:opacity-30 transition-all text-gray-600 dark:text-gray-400"
+                                >
+                                    <ArrowLeft className="w-6 h-6" />
+                                </button>
+                                <span className="font-bold text-indigo-600 dark:text-indigo-400 text-lg">
+                                    {currentIndex + 1} <span className="text-gray-400 text-sm">/ {results.length}</span>
+                                </span>
+                                <button
+                                    onClick={() => setCurrentIndex(prev => Math.min(results.length - 1, prev + 1))}
+                                    disabled={currentIndex === results.length - 1}
+                                    className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 disabled:opacity-30 transition-all text-gray-600 dark:text-gray-400"
+                                >
+                                    {currentIndex === results.length - 1 ? (
+                                        <CheckCircle2 className="w-6 h-6 text-green-500" />
+                                    ) : (
+                                        <ArrowLeft className="w-6 h-6 rotate-180" />
+                                    )}
+                                </button>
+                            </div>
+
+                            {/* Current Sentence Card */}
+                            <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 shadow-md animate-in fade-in slide-in-from-right-4 duration-300" key={currentIndex}>
+                                <div className="mb-8">
+                                    <ResultArea result={results[currentIndex]} />
+                                    <p className="mt-4 text-gray-600 dark:text-gray-300 text-xl leading-relaxed font-medium text-center">
+                                        {results[currentIndex].translatedText}
+                                    </p>
+                                </div>
+
+                                {results[currentIndex].items && results[currentIndex].items.length > 0 && (
+                                    <div className="pt-6 border-t border-gray-100 dark:border-gray-800">
+                                        <AnalysisList items={results[currentIndex].items} />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex-1 overflow-y-auto min-h-0 pb-20 pl-4 pr-6 custom-scrollbar space-y-8"> {/* Increased left padding for indices */}
+                        {results.map((result, idx) => (
+                            <div key={idx} className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm relative group">
+                                <div className="absolute -left-3 top-6 w-6 h-6 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center text-xs font-bold text-indigo-600 dark:text-indigo-400 border border-white dark:border-gray-900 shadow-sm z-10">
+                                    {idx + 1}
+                                </div>
+
+                                <div className="mb-6 pl-4">
+                                    <ResultArea result={result} />
+                                    <p className="mt-3 text-gray-600 dark:text-gray-400 text-lg leading-relaxed font-medium">
+                                        {result.translatedText}
+                                    </p>
+                                </div>
+
+                                {/* Analysis List */}
+                                {result.items && result.items.length > 0 && (
+                                    <div className="pl-4 border-l-2 border-gray-100 dark:border-gray-800">
+                                        <AnalysisList items={result.items} />
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+
+                        <div className="text-center pt-8 pb-4">
+                            <button
+                                onClick={handleReset}
+                                className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 dark:shadow-none"
+                            >
+                                다른 콘텐츠 학습하기
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
-        )
-        }
-            </div >
         );
     }
 
