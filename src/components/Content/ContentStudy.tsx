@@ -62,7 +62,7 @@ export function ContentStudy() {
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto min-h-0 pb-20 pl-1 pr-2 custom-scrollbar space-y-8">
+                <div className="flex-1 overflow-y-auto min-h-0 pb-20 pl-1 pr-6 custom-scrollbar space-y-8">
                     {results.map((result, idx) => (
                         <div key={idx} className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm relative group">
                             <div className="absolute -left-3 top-6 w-6 h-6 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center text-xs font-bold text-indigo-600 dark:text-indigo-400">
@@ -100,7 +100,7 @@ export function ContentStudy() {
 
     return (
         <div className="flex flex-col h-full max-w-3xl mx-auto px-4 py-6">
-            <div className="flex-1 overflow-y-auto min-h-0 pb-20 px-1 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto min-h-0 pb-20 pl-1 pr-6 custom-scrollbar">
                 <div className="text-center mb-10">
                     <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                         <ScrollText className="w-8 h-8 text-white" />
