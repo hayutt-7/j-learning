@@ -4,7 +4,8 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { JLPTLevel, LearningItem } from '@/lib/types';
 import { LevelSelector } from './LevelSelector';
 import { VocabCard } from './VocabCard';
-import { ArrowLeft, ChevronLeft, ChevronRight, Trophy, X, Zap, BookX, Flame, Settings, Eye, EyeOff, Filter, Star, Download } from 'lucide-react';
+import { QuoteStudy } from './QuoteStudy'; // New Import
+import { ArrowLeft, ChevronLeft, ChevronRight, Trophy, X, Zap, BookX, Flame, Settings, Eye, EyeOff, Filter, Star, Download, Quote } from 'lucide-react';
 import { useUserProgress, XP_TABLE } from '@/hooks/useUserProgress';
 import { useLearningHistory } from '@/hooks/useLearningHistory';
 import { useDailyGoals } from '@/hooks/useDailyGoals';
@@ -20,7 +21,10 @@ interface SessionStats {
     incorrectCount: number;
 }
 
+type StudyMode = 'VOCAB' | 'QUOTE';
+
 export function VocabStudy() {
+    const [activeTab, setActiveTab] = useState<StudyMode>('VOCAB'); // Tab State
     const [level, setLevel] = useState<JLPTLevel | null>(null);
     const [cards, setCards] = useState<LearningItem[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -218,55 +222,85 @@ export function VocabStudy() {
 
     if (!level) {
         return (
-            <div className="flex flex-col items-center justify-center h-full w-full max-w-4xl mx-auto px-4">
-                <div className="w-full mb-12 text-center">
-                    <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">단어장 선택</h2>
-                    <p className="text-gray-500 dark:text-gray-400">학습할 레벨이나 모드를 선택해주세요.</p>
+            <div className="flex flex-col items-center justify-center h-full w-full max-w-4xl mx-auto px-4 py-8">
+                {/* Mode Tabs */}
+                <div className="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-xl mb-8">
+                    <button
+                        onClick={() => setActiveTab('VOCAB')}
+                        className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'VOCAB'
+                                ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                            }`}
+                    >
+                        <BookX className="w-4 h-4" />
+                        단어 암기
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('QUOTE')}
+                        className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'QUOTE'
+                                ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                            }`}
+                    >
+                        <Quote className="w-4 h-4" />
+                        명언/문장
+                    </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
-                    {/* Custom Vocab Button */}
-                    <div className="relative group flex flex-col items-center bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 border-2 border-amber-200 dark:border-amber-800 rounded-3xl shadow-lg hover:shadow-amber-500/20 transition-all hover:-translate-y-1">
-                        <button
-                            onClick={() => startSession('BOOKMARKED')}
-                            className="w-full h-full p-8 flex flex-col items-center"
-                        >
-                            <div className="p-4 bg-white dark:bg-gray-800 rounded-full shadow-md mb-4 group-hover:rotate-12 transition-transform">
-                                <Star className="w-8 h-8 text-amber-500 fill-current" />
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">나만의 단어장</h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-300 text-center font-medium">
-                                북마크한 단어 집중 복습
-                            </p>
-                            <div className="absolute top-4 right-4 bg-white/80 dark:bg-gray-900/80 px-3 py-1 rounded-full text-xs font-bold text-amber-600 dark:text-amber-400 backdrop-blur-sm">
-                                Saved
-                            </div>
-                        </button>
+                {activeTab === 'QUOTE' ? (
+                    <QuoteStudy />
+                ) : (
+                    <div className="w-full text-center animate-in fade-in">
+                        <div className="w-full mb-8 text-center">
+                            <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">단어장 선택</h2>
+                            <p className="text-gray-500 dark:text-gray-400">학습할 레벨이나 모드를 선택해주세요.</p>
+                        </div>
 
-                        {/* Anki Export Button */}
-                        <button
-                            onClick={(e) => { e.stopPropagation(); downloadAnkiCSV(); }}
-                            className="absolute bottom-4 right-4 p-2 bg-white/90 dark:bg-gray-800/90 rounded-full text-gray-500 hover:text-green-600 hover:bg-white shadow-sm border border-transparent hover:border-green-200 transition-all"
-                            title="Anki용 CSV 내보내기"
-                        >
-                            <Download className="w-4 h-4" />
-                        </button>
-                    </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl mx-auto">
+                            {/* Custom Vocab Button */}
+                            <div className="relative group flex flex-col items-center bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 border-2 border-amber-200 dark:border-amber-800 rounded-3xl shadow-lg hover:shadow-amber-500/20 transition-all hover:-translate-y-1">
+                                <button
+                                    onClick={() => startSession('BOOKMARKED')}
+                                    className="w-full h-full p-8 flex flex-col items-center"
+                                >
+                                    <div className="p-4 bg-white dark:bg-gray-800 rounded-full shadow-md mb-4 group-hover:rotate-12 transition-transform">
+                                        <Star className="w-8 h-8 text-amber-500 fill-current" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">나만의 단어장</h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-300 text-center font-medium">
+                                        북마크한 단어 집중 복습
+                                    </p>
+                                    <div className="absolute top-4 right-4 bg-white/80 dark:bg-gray-900/80 px-3 py-1 rounded-full text-xs font-bold text-amber-600 dark:text-amber-400 backdrop-blur-sm">
+                                        Saved
+                                    </div>
+                                </button>
 
-                    {/* JLPT Levels */}
-                    <div className="grid grid-cols-2 gap-4">
-                        {['N5', 'N4', 'N3', 'N2', 'N1'].map((jlpt) => (
-                            <button
-                                key={jlpt}
-                                onClick={() => startSession(jlpt as JLPTLevel)}
-                                className="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-indigo-200 transition-all group"
-                            >
-                                <span className="text-lg font-bold text-gray-400 group-hover:text-indigo-500 transition-colors">{jlpt}</span>
-                                <span className="text-xs text-gray-400 mt-1">Level</span>
-                            </button>
-                        ))}
+                                {/* Anki Export Button */}
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); downloadAnkiCSV(); }}
+                                    className="absolute bottom-4 right-4 p-2 bg-white/90 dark:bg-gray-800/90 rounded-full text-gray-500 hover:text-green-600 hover:bg-white shadow-sm border border-transparent hover:border-green-200 transition-all"
+                                    title="Anki용 CSV 내보내기"
+                                >
+                                    <Download className="w-4 h-4" />
+                                </button>
+                            </div>
+
+                            {/* JLPT Levels */}
+                            <div className="grid grid-cols-2 gap-4">
+                                {['N5', 'N4', 'N3', 'N2', 'N1'].map((jlpt) => (
+                                    <button
+                                        key={jlpt}
+                                        onClick={() => startSession(jlpt as JLPTLevel)}
+                                        className="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-indigo-200 transition-all group"
+                                    >
+                                        <span className="text-lg font-bold text-gray-400 group-hover:text-indigo-500 transition-colors">{jlpt}</span>
+                                        <span className="text-xs text-gray-400 mt-1">Level</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         );
     }

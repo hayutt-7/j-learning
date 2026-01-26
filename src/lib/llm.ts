@@ -274,3 +274,109 @@ Response Format (JSON only):
         };
     }
 }
+
+export async function generateQuoteWithGroq(theme: string = 'Life'): Promise<AnalysisResult> {
+    if (!apiKey) {
+        throw new Error("GROQ_API_KEY is not set");
+    }
+
+    const themePrompt = theme === 'Random' ? 'any inspiring theme' : theme;
+
+    const prompt = `
+You are a wise Japanese mentor.
+Generate an inspiring Japanese quote or proverb about "${themePrompt}".
+It can be a famous quote or a common proverb.
+
+Requirements:
+1. **Quote**: Natural Japanese quote (Kanji mixed).
+2. **Translation**: Korean translation.
+3. **Analysis**: Break it down and analyze key vocabulary.
+
+Response Format (JSON only):
+{
+  "translatedText": "Korean translation of the quote",
+  "tokens": [
+    { "text": "七", "reading": "なな", "romaji": "nana" },
+    { "text": "転", "reading": "ころ", "romaji": "kori" }
+  ],
+  "items": [
+    {
+      "id": "unique-id",
+      "text": "Quote in Japanese",
+      "type": "quote",
+      "meaning": "Korean meaning",
+      "reading": "Hiragana reading of the full quote",
+      "explanation": "Origin or deeper meaning of the quote in Korean",
+      "nuance": "Theme (e.g. Life, Success)",
+      "jlpt": "N/A",
+      "examples": ["Example usage if applicable"]
+    },
+    {
+      "id": "unique-id-2",
+      "text": "Key Word from quote",
+      "type": "vocab",
+      "meaning": "Meaning",
+      "reading": "Reading",
+      "explanation": "Explanation",
+      "examples": []
+    }
+  ]
+}
+`;
+
+    try {
+        const completion = await groq.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            messages: [
+                {
+                    role: "user",
+                    content: prompt,
+                },
+            ],
+            temperature: 0.9, // Creative
+            max_tokens: 1024,
+            response_format: { type: "json_object" },
+        });
+
+        const responseText = completion.choices[0]?.message?.content || "";
+        if (!responseText) throw new Error("Empty response");
+
+        const data = JSON.parse(responseText) as AnalysisResult;
+
+        // Ensure arrays exist
+        data.items = data.items || [];
+        data.tokens = data.tokens || [];
+
+        return data;
+    } catch (error) {
+        console.error("Quote Generation Error:", error);
+        throw new Error("Failed to generate quote");
+    }
+}
+
+export async function translateQueryToJapanese(query: string): Promise<string> {
+    if (!apiKey) return query; // No API key, fallback to original
+
+    // Simple check: if already Japanese or English, return as is (optimization)
+    // But user might input "사과" (Apple). We need to translate.
+
+    const prompt = `
+Translate this Korean word/phrase to Japanese for dictionary lookup.
+Only return the Japanese word/kanji. No explanations.
+Input: "${query}"
+Output:
+`;
+
+    try {
+        const completion = await groq.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.1,
+            max_tokens: 20,
+        });
+
+        return completion.choices[0]?.message?.content?.trim() || query;
+    } catch {
+        return query;
+    }
+}

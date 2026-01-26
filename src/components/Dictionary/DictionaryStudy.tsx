@@ -59,26 +59,26 @@ export function DictionaryStudy() {
     };
 
     return (
-        <div className="max-w-3xl mx-auto py-8 px-4 pb-32">
-            <div className="text-center mb-10">
-                <div className="w-16 h-16 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-teal-200 dark:shadow-none">
-                    <Book className="w-8 h-8 text-white" />
+        <div className="flex flex-col h-full max-w-3xl mx-auto px-4 py-6">
+            <div className="flex-none text-center mb-8">
+                <div className="w-14 h-14 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-teal-200 dark:shadow-none">
+                    <Book className="w-7 h-7 text-white" />
                 </div>
-                <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2">일본어 사전</h1>
-                <p className="text-gray-500 dark:text-gray-400 text-lg">
-                    궁금한 단어를 검색해보세요. <br />
+                <h1 className="text-2xl font-black text-gray-900 dark:text-white mb-1">일본어 사전</h1>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
+                    궁금한 단어를 검색해보세요. (한글 지원)<br />
                     <span className="text-xs text-gray-400 mt-1 block">Powered by Jisho.org</span>
                 </p>
             </div>
 
             {/* Search Input */}
-            <div className="relative max-w-2xl mx-auto mb-12">
+            <div className="flex-none relative w-full mb-6">
                 <input
                     type="text"
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="단어를 입력하세요 (예: 水, water)"
+                    placeholder="단어를 입력하세요 (예: 물, water, かばん)"
                     className="w-full pl-6 pr-14 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-lg shadow-lg shadow-gray-100 dark:shadow-none focus:outline-none focus:border-teal-500 transition-colors"
                 />
                 <button
@@ -90,8 +90,8 @@ export function DictionaryStudy() {
                 </button>
             </div>
 
-            {/* Results */}
-            <div className="space-y-4">
+            {/* Results - Scrollable Area */}
+            <div className="flex-1 overflow-y-auto min-h-0 space-y-4 pb-20 pr-1 custom-scrollbar">
                 {error && (
                     <div className="text-center p-8 bg-red-50 dark:bg-red-900/20 rounded-2xl text-red-600 dark:text-red-400">
                         {error}
