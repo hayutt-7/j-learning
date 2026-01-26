@@ -10,10 +10,13 @@ export async function translateAndAnalyze(text: string): Promise<AnalysisResult>
 
     try {
         return await analyzeJapaneseWithGemini(text);
-    } catch (error: unknown) {
+    } catch (error: any) {
         console.error("Translation error:", error);
+        // Debugging: Throw the actual error to see it in the UI
+        throw new Error(`API Error: ${error.message || JSON.stringify(error)}`);
 
-        // Fallback to Mock Data
+        // Original Fallback Logic (Commented out for debugging)
+        /*
         console.log("Falling back to Mock Data...");
         try {
             const { analyzeText } = await import('@/lib/mockAnalyzer');
@@ -23,6 +26,7 @@ export async function translateAndAnalyze(text: string): Promise<AnalysisResult>
             console.error("Mock fallback failed:", mockError);
             throw new Error("서비스를 사용할 수 없습니다.");
         }
+        */
     }
 }
 
