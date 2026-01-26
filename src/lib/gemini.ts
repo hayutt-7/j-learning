@@ -11,7 +11,7 @@ export async function analyzeJapaneseWithGemini(koreanText: string): Promise<Ana
   }
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash-001",
+    model: "gemini-pro",
     generationConfig: { responseMimeType: "application/json" }
   });
 
@@ -85,7 +85,7 @@ export async function chatWithGemini(message: string, context: string, history: 
     throw new Error("GEMINI_API_KEY is not set");
   }
 
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
+  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
   const systemPrompt = `당신은 일본어 학습을 도와주는 친절한 AI 튜터입니다.
 사용자가 현재 공부하고 있는 문장(Context)에 대해 질문하면, 문법, 단어 뉘앙스, 문화적 배경 등을 자세히 설명해주세요.
@@ -122,7 +122,7 @@ export async function analyzeLongTextWithGemini(contextText: string): Promise<An
   }
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash-001",
+    model: "gemini-pro",
     generationConfig: { responseMimeType: "application/json" }
   });
 
