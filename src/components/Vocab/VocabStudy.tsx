@@ -222,14 +222,14 @@ export function VocabStudy() {
 
     if (!level) {
         return (
-            <div className="flex flex-col items-center justify-center h-full w-full max-w-4xl mx-auto px-4 py-8">
-                {/* Mode Tabs */}
-                <div className="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-xl mb-8">
+            <div className="flex flex-col h-full w-full max-w-4xl mx-auto px-4 py-8">
+                {/* Mode Tabs - Fixed at top */}
+                <div className="flex-none flex p-1 bg-gray-100 dark:bg-gray-800 rounded-xl mb-8">
                     <button
                         onClick={() => setActiveTab('VOCAB')}
                         className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'VOCAB'
-                                ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
-                                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                            ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                             }`}
                     >
                         <BookX className="w-4 h-4" />
@@ -238,8 +238,8 @@ export function VocabStudy() {
                     <button
                         onClick={() => setActiveTab('QUOTE')}
                         className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'QUOTE'
-                                ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
-                                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                            ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                             }`}
                     >
                         <Quote className="w-4 h-4" />
@@ -247,60 +247,62 @@ export function VocabStudy() {
                     </button>
                 </div>
 
-                {activeTab === 'QUOTE' ? (
-                    <QuoteStudy />
-                ) : (
-                    <div className="w-full text-center animate-in fade-in">
-                        <div className="w-full mb-8 text-center">
-                            <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">단어장 선택</h2>
-                            <p className="text-gray-500 dark:text-gray-400">학습할 레벨이나 모드를 선택해주세요.</p>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl mx-auto">
-                            {/* Custom Vocab Button */}
-                            <div className="relative group flex flex-col items-center bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 border-2 border-amber-200 dark:border-amber-800 rounded-3xl shadow-lg hover:shadow-amber-500/20 transition-all hover:-translate-y-1">
-                                <button
-                                    onClick={() => startSession('BOOKMARKED')}
-                                    className="w-full h-full p-8 flex flex-col items-center"
-                                >
-                                    <div className="p-4 bg-white dark:bg-gray-800 rounded-full shadow-md mb-4 group-hover:rotate-12 transition-transform">
-                                        <Star className="w-8 h-8 text-amber-500 fill-current" />
-                                    </div>
-                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">나만의 단어장</h3>
-                                    <p className="text-sm text-gray-600 dark:text-gray-300 text-center font-medium">
-                                        북마크한 단어 집중 복습
-                                    </p>
-                                    <div className="absolute top-4 right-4 bg-white/80 dark:bg-gray-900/80 px-3 py-1 rounded-full text-xs font-bold text-amber-600 dark:text-amber-400 backdrop-blur-sm">
-                                        Saved
-                                    </div>
-                                </button>
-
-                                {/* Anki Export Button */}
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); downloadAnkiCSV(); }}
-                                    className="absolute bottom-4 right-4 p-2 bg-white/90 dark:bg-gray-800/90 rounded-full text-gray-500 hover:text-green-600 hover:bg-white shadow-sm border border-transparent hover:border-green-200 transition-all"
-                                    title="Anki용 CSV 내보내기"
-                                >
-                                    <Download className="w-4 h-4" />
-                                </button>
+                <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar">
+                    {activeTab === 'QUOTE' ? (
+                        <QuoteStudy />
+                    ) : (
+                        <div className="w-full text-center animate-in fade-in pb-20">
+                            <div className="w-full mb-8 text-center">
+                                <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">단어장 선택</h2>
+                                <p className="text-gray-500 dark:text-gray-400">학습할 레벨이나 모드를 선택해주세요.</p>
                             </div>
 
-                            {/* JLPT Levels */}
-                            <div className="grid grid-cols-2 gap-4">
-                                {['N5', 'N4', 'N3', 'N2', 'N1'].map((jlpt) => (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl mx-auto">
+                                {/* Custom Vocab Button */}
+                                <div className="relative group flex flex-col items-center bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 border-2 border-amber-200 dark:border-amber-800 rounded-3xl shadow-lg hover:shadow-amber-500/20 transition-all hover:-translate-y-1">
                                     <button
-                                        key={jlpt}
-                                        onClick={() => startSession(jlpt as JLPTLevel)}
-                                        className="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-indigo-200 transition-all group"
+                                        onClick={() => startSession('BOOKMARKED')}
+                                        className="w-full h-full p-8 flex flex-col items-center"
                                     >
-                                        <span className="text-lg font-bold text-gray-400 group-hover:text-indigo-500 transition-colors">{jlpt}</span>
-                                        <span className="text-xs text-gray-400 mt-1">Level</span>
+                                        <div className="p-4 bg-white dark:bg-gray-800 rounded-full shadow-md mb-4 group-hover:rotate-12 transition-transform">
+                                            <Star className="w-8 h-8 text-amber-500 fill-current" />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">나만의 단어장</h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-300 text-center font-medium">
+                                            북마크한 단어 집중 복습
+                                        </p>
+                                        <div className="absolute top-4 right-4 bg-white/80 dark:bg-gray-900/80 px-3 py-1 rounded-full text-xs font-bold text-amber-600 dark:text-amber-400 backdrop-blur-sm">
+                                            Saved
+                                        </div>
                                     </button>
-                                ))}
+
+                                    {/* Anki Export Button */}
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); downloadAnkiCSV(); }}
+                                        className="absolute bottom-4 right-4 p-2 bg-white/90 dark:bg-gray-800/90 rounded-full text-gray-500 hover:text-green-600 hover:bg-white shadow-sm border border-transparent hover:border-green-200 transition-all"
+                                        title="Anki용 CSV 내보내기"
+                                    >
+                                        <Download className="w-4 h-4" />
+                                    </button>
+                                </div>
+
+                                {/* JLPT Levels */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    {['N5', 'N4', 'N3', 'N2', 'N1'].map((jlpt) => (
+                                        <button
+                                            key={jlpt}
+                                            onClick={() => startSession(jlpt as JLPTLevel)}
+                                            className="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-indigo-200 transition-all group"
+                                        >
+                                            <span className="text-lg font-bold text-gray-400 group-hover:text-indigo-500 transition-colors">{jlpt}</span>
+                                            <span className="text-xs text-gray-400 mt-1">Level</span>
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
         );
     }
@@ -308,7 +310,7 @@ export function VocabStudy() {
     return (
         <div className="flex flex-col items-center w-full max-w-lg mx-auto h-full py-6">
             {/* Header */}
-            <div className="flex items-center justify-between w-full mb-4 px-4">
+            <div className="flex-none flex items-center justify-between w-full mb-4 px-4">
                 <button
                     onClick={handleExit}
                     className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
@@ -334,57 +336,60 @@ export function VocabStudy() {
                 </div>
             </div>
 
-            {/* Wrong Words Filter Badge */}
-            {wrongWordsOnly && (
-                <div className="mb-3 px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-full text-xs font-bold flex items-center gap-1">
-                    <Filter className="w-3 h-3" /> 오답만 보기 모드
+            {/* Content Area - Scrollable if card is tall */}
+            <div className="flex-1 w-full overflow-y-auto min-h-0 custom-scrollbar px-4 flex flex-col items-center">
+                {/* Wrong Words Filter Badge */}
+                {wrongWordsOnly && (
+                    <div className="mb-3 px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-full text-xs font-bold flex items-center gap-1">
+                        <Filter className="w-3 h-3" /> 오답만 보기 모드
+                    </div>
+                )}
+
+                {/* Card */}
+                {currentItem && (
+                    <VocabCard item={currentItem} onResult={handleResult} showReading={showReading} />
+                )}
+
+                {/* Navigation */}
+                <div className="flex items-center gap-4 mt-6 mb-6">
+                    <button
+                        onClick={goPrev}
+                        disabled={currentIndex === 0}
+                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    >
+                        <ChevronLeft className="w-5 h-5" />
+                        이전
+                    </button>
+                    <button
+                        onClick={goNext}
+                        disabled={currentIndex === cards.length - 1}
+                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 text-white font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-indigo-700 transition-colors"
+                    >
+                        다음
+                        <ChevronRight className="w-5 h-5" />
+                    </button>
                 </div>
-            )}
 
-            {/* Card */}
-            {currentItem && (
-                <VocabCard item={currentItem} onResult={handleResult} showReading={showReading} />
-            )}
-
-            {/* Navigation */}
-            <div className="flex items-center gap-4 mt-6">
-                <button
-                    onClick={goPrev}
-                    disabled={currentIndex === 0}
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                >
-                    <ChevronLeft className="w-5 h-5" />
-                    이전
-                </button>
-                <button
-                    onClick={goNext}
-                    disabled={currentIndex === cards.length - 1}
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 text-white font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-indigo-700 transition-colors"
-                >
-                    다음
-                    <ChevronRight className="w-5 h-5" />
-                </button>
-            </div>
-
-            {/* Progress Dots */}
-            <div className="flex items-center gap-1 mt-6 overflow-x-auto max-w-full px-4">
-                {cards.map((card, idx) => {
-                    const status = cardStatuses.get(card.id);
-                    return (
-                        <button
-                            key={card.id}
-                            onClick={() => setCurrentIndex(idx)}
-                            className={`w-3 h-3 rounded-full transition-all ${idx === currentIndex
-                                ? 'bg-indigo-600 scale-125'
-                                : status === 'know'
-                                    ? 'bg-emerald-400'
-                                    : status === 'dont_know'
-                                        ? 'bg-red-400'
-                                        : 'bg-gray-200 dark:bg-gray-700'
-                                }`}
-                        />
-                    );
-                })}
+                {/* Progress Dots */}
+                <div className="flex items-center gap-1 overflow-x-auto max-w-full pb-4">
+                    {cards.map((card, idx) => {
+                        const status = cardStatuses.get(card.id);
+                        return (
+                            <button
+                                key={card.id}
+                                onClick={() => setCurrentIndex(idx)}
+                                className={`w-3 h-3 rounded-full transition-all shrink-0 ${idx === currentIndex
+                                    ? 'bg-indigo-600 scale-125'
+                                    : status === 'know'
+                                        ? 'bg-emerald-400'
+                                        : status === 'dont_know'
+                                            ? 'bg-red-400'
+                                            : 'bg-gray-200 dark:bg-gray-700'
+                                    }`}
+                            />
+                        );
+                    })}
+                </div>
             </div>
 
             {/* Exit Modal */}

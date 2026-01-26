@@ -285,40 +285,39 @@ export async function generateQuoteWithGroq(theme: string = 'Life'): Promise<Ana
     const prompt = `
 You are a wise Japanese mentor.
 Generate an inspiring Japanese quote or proverb about "${themePrompt}".
-It can be a famous quote or a common proverb.
 
-Requirements:
-1. **Quote**: Natural Japanese quote (Kanji mixed).
-2. **Translation**: Korean translation.
-3. **Analysis**: Break it down and analyze key vocabulary.
+CRITICAL REQUIREMENTS:
+1. **Language**: The main quote MUST be in **JAPANESE** (Kanji/Hiragana).
+2. **Translation**: Provide Korean translation.
+3. **Analysis**: Analyze the JAPANESE words used in the quote.
 
 Response Format (JSON only):
 {
-  "translatedText": "Korean translation of the quote",
+  "translatedText": "한국어 해석 (Korean translation)",
   "tokens": [
     { "text": "七", "reading": "なな", "romaji": "nana" },
     { "text": "転", "reading": "ころ", "romaji": "kori" }
   ],
   "items": [
     {
-      "id": "unique-id",
-      "text": "Quote in Japanese",
+      "id": "unique-id-1",
+      "text": "七転び八起き (The full Japanese Quote)", 
       "type": "quote",
-      "meaning": "Korean meaning",
-      "reading": "Hiragana reading of the full quote",
-      "explanation": "Origin or deeper meaning of the quote in Korean",
-      "nuance": "Theme (e.g. Life, Success)",
+      "meaning": "칠전팔기 (Korean Meaning)",
+      "reading": "ななころびやおき (Full Hiragana Reading)",
+      "explanation": "이 명언의 유래나 의미에 대한 한국어 설명...",
+      "nuance": "${theme}",
       "jlpt": "N/A",
-      "examples": ["Example usage if applicable"]
+      "examples": ["실생활 예문 (일본어)"]
     },
     {
       "id": "unique-id-2",
-      "text": "Key Word from quote",
+      "text": "転ぶ (Japanese Word)",
       "type": "vocab",
-      "meaning": "Meaning",
-      "reading": "Reading",
-      "explanation": "Explanation",
-      "examples": []
+      "meaning": "넘어지다 (Korean Meaning)",
+      "reading": "ころぶ",
+      "explanation": "단어 설명...",
+      "examples": ["道で転んだ。"]
     }
   ]
 }

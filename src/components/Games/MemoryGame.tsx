@@ -1,222 +1,131 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { LearningHistoryItem } from '@/lib/types';
-import { ArrowLeft, Trophy, RotateCcw } from 'lucide-react';
+import { LearningItem } from '@/lib/types';
+import { ArrowLeft, Grid3X3, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useDailyGoals } from '@/hooks/useDailyGoals';
-import { useStudyLog } from '@/hooks/useStudyLog';
 
 interface MemoryGameProps {
-    words: LearningHistoryItem[];
+    words: LearningItem[];
     onBack: () => void;
 }
 
-interface Card {
-    id: string;
-    text: string;
-    pairId: string;
+interface MemoryCard {
+    id: number;
+    content: string;
+    type: 'word' | 'meaning';
+    wordId: string;
     isFlipped: boolean;
     isMatched: boolean;
 }
 
 export function MemoryGame({ words, onBack }: MemoryGameProps) {
-    const [cards, setCards] = useState<Card[]>([]);
-    const [flippedCards, setFlippedCards] = useState<Card[]>([]);
-    const [moves, setMoves] = useState(0);
-    const [matchedPairs, setMatchedPairs] = useState(0);
-    const [isFinished, setIsFinished] = useState(false);
-    const [isChecking, setIsChecking] = useState(false);
+    const [cards, setCards] = useState<MemoryCard[]>([]);
+    const [flipped, setFlipped] = useState<MemoryCard[]>([]);
+    const [matchedCount, setMatchedCount] = useState(0);
 
-    const dailyGoals = useDailyGoals();
-    const studyLog = useStudyLog();
-
-    const totalPairs = Math.min(6, words.length);
-
-    // Initialize game
     useEffect(() => {
-        const shuffled = [...words].sort(() => Math.random() - 0.5).slice(0, totalPairs);
+        if (!words.length) return;
+        // Take 6 pairs (12 cards) for 3x4 grid
+        const gameWords = [...words].sort(() => Math.random() - 0.5).slice(0, 6);
 
-        const wordCards: Card[] = shuffled.map(w => ({
-            id: `word-${w.itemId}`,
-            text: w.text || '',
-            pairId: w.itemId,
-            isFlipped: false,
-            isMatched: false,
-        }));
+        const newCards: MemoryCard[] = [];
+        gameWords.forEach(w => {
+            newCards.push({ id: Math.random(), content: w.text, type: 'word', wordId: w.id, isFlipped: false, isMatched: false });
+            newCards.push({ id: Math.random(), content: w.meaning, type: 'meaning', wordId: w.id, isFlipped: false, isMatched: false });
+        });
 
-        const meaningCards: Card[] = shuffled.map(w => ({
-            id: `meaning-${w.itemId}`,
-            text: w.meaning || '',
-            pairId: w.itemId,
-            isFlipped: false,
-            isMatched: false,
-        }));
+        setCards(newCards.sort(() => Math.random() - 0.5));
+    }, [words]);
 
-        const allCards = [...wordCards, ...meaningCards].sort(() => Math.random() - 0.5);
-        setCards(allCards);
-    }, [words, totalPairs]);
+    const handleCardClick = (card: MemoryCard) => {
+        if (flipped.length >= 2 || card.isFlipped || card.isMatched) return;
 
-    const handleCardClick = (card: Card) => {
-        if (isChecking || card.isFlipped || card.isMatched || flippedCards.length >= 2) return;
+        // Flip card
+        const newCards = cards.map(c => c.id === card.id ? { ...c, isFlipped: true } : c);
+        setCards(newCards);
 
-        const newFlipped = [...flippedCards, card];
-        setFlippedCards(newFlipped);
-        setCards(prev => prev.map(c => c.id === card.id ? { ...c, isFlipped: true } : c));
+        const newFlipped = [...flipped, card];
+        setFlipped(newFlipped);
 
         if (newFlipped.length === 2) {
-            setMoves(prev => prev + 1);
-            setIsChecking(true);
-
-            setTimeout(() => {
-                const [first, second] = newFlipped;
-                if (first.pairId === second.pairId) {
-                    // Match!
+            // Check match
+            const [c1, c2] = newFlipped;
+            if (c1.wordId === c2.wordId && c1.type !== c2.type) {
+                // Match
+                setTimeout(() => {
                     setCards(prev => prev.map(c =>
-                        c.pairId === first.pairId ? { ...c, isMatched: true } : c
+                        c.wordId === c1.wordId ? { ...c, isMatched: true } : c
                     ));
-                    setMatchedPairs(prev => {
-                        const newCount = prev + 1;
-                        if (newCount >= totalPairs) {
-                            setIsFinished(true);
-                            dailyGoals.addWords(totalPairs);
-                            studyLog.logStudy({ wordsLearned: totalPairs });
-                        }
-                        return newCount;
-                    });
-                } else {
-                    // No match, flip back
+                    setFlipped([]);
+                    setMatchedCount(prev => prev + 1);
+                }, 500);
+            } else {
+                // No match
+                setTimeout(() => {
                     setCards(prev => prev.map(c =>
-                        c.id === first.id || c.id === second.id ? { ...c, isFlipped: false } : c
+                        c.id === c1.id || c.id === c2.id ? { ...c, isFlipped: false } : c
                     ));
-                }
-                setFlippedCards([]);
-                setIsChecking(false);
-            }, 800);
+                    setFlipped([]);
+                }, 1000);
+            }
         }
     };
 
-    const resetGame = () => {
-        const shuffled = [...words].sort(() => Math.random() - 0.5).slice(0, totalPairs);
-
-        const wordCards: Card[] = shuffled.map(w => ({
-            id: `word-${w.itemId}`,
-            text: w.text || '',
-            pairId: w.itemId,
-            isFlipped: false,
-            isMatched: false,
-        }));
-
-        const meaningCards: Card[] = shuffled.map(w => ({
-            id: `meaning-${w.itemId}`,
-            text: w.meaning || '',
-            pairId: w.itemId,
-            isFlipped: false,
-            isMatched: false,
-        }));
-
-        setCards([...wordCards, ...meaningCards].sort(() => Math.random() - 0.5));
-        setMoves(0);
-        setMatchedPairs(0);
-        setFlippedCards([]);
-        setIsFinished(false);
-    };
-
-    if (isFinished) {
-        const stars = moves <= totalPairs * 2 ? 3 : moves <= totalPairs * 3 ? 2 : 1;
+    if (matchedCount === 6 && cards.length > 0) {
         return (
-            <div className="max-w-md mx-auto py-12 px-4">
-                <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 text-center shadow-xl">
-                    <div className="w-20 h-20 bg-gradient-to-br from-pink-400 to-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <Trophy className="w-10 h-10 text-white" />
-                    </div>
-                    <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-2">완벽해요!</h2>
-                    <p className="text-gray-500 mb-4">{totalPairs}개 짝 모두 찾기</p>
-
-                    <div className="flex justify-center gap-1 mb-8">
-                        {[1, 2, 3].map(i => (
-                            <span key={i} className={cn(
-                                "text-3xl",
-                                i <= stars ? "text-yellow-400" : "text-gray-300"
-                            )}>★</span>
-                        ))}
-                    </div>
-
-                    <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-4 mb-8">
-                        <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400">{moves}</p>
-                        <p className="text-xs text-gray-500">시도 횟수</p>
-                    </div>
-
-                    <div className="space-y-3">
-                        <button
-                            onClick={resetGame}
-                            className="w-full py-4 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center gap-2"
-                        >
-                            <RotateCcw className="w-5 h-5" />
-                            다시 하기
-                        </button>
-                        <button
-                            onClick={onBack}
-                            className="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors"
-                        >
-                            게임 목록으로
-                        </button>
-                    </div>
+            <div className="flex flex-col h-full items-center justify-center p-8 text-center animate-in fade-in">
+                <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-xl max-w-md w-full">
+                    <Trophy className="w-16 h-16 text-pink-500 mx-auto mb-6" />
+                    <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-2">훌륭해요!</h2>
+                    <p className="text-gray-500 mb-8">기억력이 정말 좋으시네요!</p>
+                    <button onClick={onBack} className="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl">목록으로</button>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-md mx-auto py-8 px-4 pb-40 lg:pb-12">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col h-full max-w-lg mx-auto px-4 py-8">
+            <div className="flex-none flex items-center justify-between mb-8">
                 <button onClick={onBack} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full">
                     <ArrowLeft className="w-6 h-6 text-gray-500" />
                 </button>
-                <div className="flex items-center gap-4">
-                    <div className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
-                        <span className="font-bold text-gray-600 dark:text-gray-400">{moves} 시도</span>
-                    </div>
-                    <div className="bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1 rounded-full">
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                            {matchedPairs}/{totalPairs}
-                        </span>
-                    </div>
+                <div className="bg-pink-50 dark:bg-pink-900/20 px-4 py-2 rounded-full">
+                    <span className="font-bold text-pink-600">{matchedCount} / 6 Pairs</span>
                 </div>
             </div>
 
-            {/* Cards Grid */}
-            <div className="grid grid-cols-3 gap-3">
-                {cards.map((card) => (
-                    <button
-                        key={card.id}
-                        onClick={() => handleCardClick(card)}
-                        disabled={card.isFlipped || card.isMatched}
-                        className={cn(
-                            "aspect-square rounded-xl font-bold text-sm transition-all duration-300 transform",
-                            card.isMatched
-                                ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 scale-95"
-                                : card.isFlipped
-                                    ? "bg-indigo-600 text-white rotate-y-180"
-                                    : "bg-gradient-to-br from-indigo-500 to-purple-600 text-transparent hover:scale-105 cursor-pointer"
-                        )}
-                        style={{
-                            perspective: '1000px',
-                            transformStyle: 'preserve-3d',
-                        }}
-                    >
-                        <div className="w-full h-full flex items-center justify-center p-2 break-keep leading-tight">
-                            {(card.isFlipped || card.isMatched) ? card.text : '?'}
+            <div className="flex-1 overflow-y-auto min-h-0 pb-20 custom-scrollbar">
+                <div className="grid grid-cols-3 gap-4 auto-rows-fr h-full">
+                    {cards.map(card => (
+                        <div
+                            key={card.id}
+                            onClick={() => handleCardClick(card)}
+                            className={cn(
+                                "relative aspect-[3/4] cursor-pointer perspective-1000",
+                                card.isMatched && "opacity-0 pointer-events-none transition-opacity duration-500"
+                            )}
+                        >
+                            <div className={cn(
+                                "w-full h-full transition-all duration-500 transform-style-3d relative",
+                                card.isFlipped ? "rotate-y-180" : ""
+                            )}>
+                                {/* Front (Hidden) */}
+                                <div className="absolute inset-0 bg-indigo-100 dark:bg-indigo-900 rounded-2xl border-4 border-white dark:border-gray-800 backface-hidden flex items-center justify-center">
+                                    <Grid3X3 className="w-8 h-8 text-indigo-300" />
+                                </div>
+                                {/* Back (Revealed) */}
+                                <div className="absolute inset-0 bg-white dark:bg-gray-800 rounded-2xl border-2 border-indigo-200 dark:border-indigo-700 backface-hidden rotate-y-180 flex items-center justify-center p-2 text-center shadow-lg">
+                                    <span className="font-bold text-gray-800 dark:text-white text-sm md:text-base break-keep">
+                                        {card.content}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                    </button>
-                ))}
+                    ))}
+                </div>
             </div>
-
-            {/* Tip */}
-            <p className="text-center text-xs text-gray-400 mt-6">
-                같은 짝을 찾아 카드를 뒤집어보세요!
-            </p>
         </div>
     );
 }

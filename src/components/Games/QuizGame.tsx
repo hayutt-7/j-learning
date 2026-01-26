@@ -1,19 +1,19 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { LearningHistoryItem } from '@/lib/types';
+import { LearningItem } from '@/lib/types';
 import { ArrowLeft, Trophy, Zap, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDailyGoals } from '@/hooks/useDailyGoals';
 import { useStudyLog } from '@/hooks/useStudyLog';
 
 interface QuizGameProps {
-    words: LearningHistoryItem[];
+    words: LearningItem[];
     onBack: () => void;
 }
 
 interface Question {
-    word: LearningHistoryItem;
+    word: LearningItem;
     options: string[];
     correctIndex: number;
 }
@@ -33,22 +33,26 @@ export function QuizGame({ words, onBack }: QuizGameProps) {
 
     // Generate questions
     useEffect(() => {
+        if (words.length === 0) return;
+
         const shuffled = [...words].sort(() => Math.random() - 0.5);
         const gameWords = shuffled.slice(0, Math.min(10, shuffled.length));
 
         const generated = gameWords.map((word) => {
             // Get 3 wrong answers from other words
-            const otherWords = words.filter(w => w.itemId !== word.itemId);
+            const otherWords = words.filter(w => w.id !== word.id);
             const wrongAnswers = otherWords
                 .sort(() => Math.random() - 0.5)
                 .slice(0, 3)
                 .map(w => w.meaning);
 
-            // Create options array with correct answer
             const options = [...wrongAnswers, word.meaning].sort(() => Math.random() - 0.5);
-            const correctIndex = options.indexOf(word.meaning);
 
-            return { word, options, correctIndex };
+            return {
+                word,
+                options,
+                correctIndex: options.indexOf(word.meaning)
+            };
         });
 
         setQuestions(generated);

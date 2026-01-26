@@ -1,134 +1,103 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { LearningHistoryItem } from '@/lib/types';
-import { ArrowLeft, Trophy, Clock, CheckCircle2 } from 'lucide-react';
+import { LearningItem } from '@/lib/types';
+import { ArrowLeft, Trophy, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useDailyGoals } from '@/hooks/useDailyGoals';
-import { useStudyLog } from '@/hooks/useStudyLog';
 
 interface MatchingGameProps {
-    words: LearningHistoryItem[];
+    words: LearningItem[];
     onBack: () => void;
 }
 
-interface MatchItem {
-    id: string;
-    text: string;
-    pairId: string;
+interface Card {
+    id: number;
+    content: string;
     type: 'word' | 'meaning';
+    wordId: string;
     isMatched: boolean;
 }
 
 export function MatchingGame({ words, onBack }: MatchingGameProps) {
-    const [items, setItems] = useState<MatchItem[]>([]);
-    const [selected, setSelected] = useState<MatchItem | null>(null);
+    const [items, setItems] = useState<Card[]>([]);
+    const [selected, setSelected] = useState<Card | null>(null);
     const [matchedCount, setMatchedCount] = useState(0);
     const [mistakes, setMistakes] = useState(0);
     const [startTime, setStartTime] = useState<number>(0);
-    const [elapsedTime, setElapsedTime] = useState(0);
-    const [isFinished, setIsFinished] = useState(false);
 
-    const dailyGoals = useDailyGoals();
-    const studyLog = useStudyLog();
-
-    const totalPairs = Math.min(6, words.length);
-
-    // Initialize game
     useEffect(() => {
-        const shuffled = [...words].sort(() => Math.random() - 0.5).slice(0, totalPairs);
+        if (!words.length) return;
 
-        const wordItems: MatchItem[] = shuffled.map(w => ({
-            id: `word-${w.itemId}`,
-            text: w.text,
-            pairId: w.itemId,
-            type: 'word',
-            isMatched: false,
-        }));
+        const shuffled = [...words]
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 8); // Take 8 pairs
 
-        const meaningItems: MatchItem[] = shuffled.map(w => ({
-            id: `meaning-${w.itemId}`,
-            text: w.meaning,
-            pairId: w.itemId,
-            type: 'meaning',
-            isMatched: false,
-        }));
+        const cardItems: Card[] = [];
+        shuffled.forEach((word) => {
+            // Word card
+            cardItems.push({
+                id: Math.random(),
+                content: word.text,
+                type: 'word',
+                wordId: word.id,
+                isMatched: false,
+            });
+            // Meaning card
+            cardItems.push({
+                id: Math.random(),
+                content: word.meaning,
+                type: 'meaning',
+                wordId: word.id,
+                isMatched: false,
+            });
+        });
 
-        // Shuffle separately for two columns
-        setItems([
-            ...wordItems.sort(() => Math.random() - 0.5),
-            ...meaningItems.sort(() => Math.random() - 0.5),
-        ]);
+        setItems(cardItems.sort(() => Math.random() - 0.5));
         setStartTime(Date.now());
-    }, [words, totalPairs]);
+    }, [words]);
 
-    // Timer
-    useEffect(() => {
-        if (isFinished || startTime === 0) return;
-        const interval = setInterval(() => {
-            setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
-        }, 100);
-        return () => clearInterval(interval);
-    }, [startTime, isFinished]);
-
-    const handleSelect = (item: MatchItem) => {
-        if (item.isMatched) return;
+    const handleCardClick = (card: Card) => {
+        if (selected && selected.id === card.id) return;
+        if (card.isMatched) return;
 
         if (!selected) {
-            setSelected(item);
-        } else if (selected.id === item.id) {
-            setSelected(null);
-        } else if (selected.type === item.type) {
-            // Same type, switch selection
-            setSelected(item);
+            setSelected(card);
         } else {
-            // Different type, check match
-            if (selected.pairId === item.pairId) {
-                // Correct match!
-                setItems(prev => prev.map(i =>
-                    i.pairId === item.pairId ? { ...i, isMatched: true } : i
+            // Check match
+            if (selected.wordId === card.wordId && selected.type !== card.type) {
+                // Match!
+                setItems(prev => prev.map(item =>
+                    item.wordId === card.wordId ? { ...item, isMatched: true } : item
                 ));
                 setMatchedCount(prev => prev + 1);
-
-                if (matchedCount + 1 >= totalPairs) {
-                    setIsFinished(true);
-                    dailyGoals.addWords(totalPairs);
-                    studyLog.logStudy({ wordsLearned: totalPairs });
-                }
+                setSelected(null);
             } else {
+                // Wrong
                 setMistakes(prev => prev + 1);
+                // Delay before clearing selection
+                setTimeout(() => setSelected(null), 500);
             }
-            setSelected(null);
         }
     };
 
-    const wordItems = items.filter(i => i.type === 'word');
-    const meaningItems = items.filter(i => i.type === 'meaning');
-
-    const formatTime = (seconds: number) => {
-        const m = Math.floor(seconds / 60);
-        const s = seconds % 60;
-        return `${m}:${s.toString().padStart(2, '0')}`;
-    };
-
-    if (isFinished) {
+    if (matchedCount === 8 || (items.length > 0 && matchedCount === items.length / 2)) {
         return (
-            <div className="max-w-md mx-auto py-12 px-4">
-                <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 text-center shadow-xl">
-                    <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <Trophy className="w-10 h-10 text-white" />
-                    </div>
-                    <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-2">완료!</h2>
-                    <p className="text-gray-500 mb-8">{totalPairs}개 매칭 성공</p>
+            <div className="flex flex-col h-full items-center justify-center p-8 text-center animate-in fade-in">
+                <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-xl max-w-md w-full">
+                    <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-6" />
+                    <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-2">게임 클리어!</h2>
+                    <p className="text-gray-500 mb-8">모든 카드를 연결했습니다</p>
 
                     <div className="grid grid-cols-2 gap-4 mb-8">
-                        <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-4">
-                            <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400">{formatTime(elapsedTime)}</p>
-                            <p className="text-xs text-gray-500">소요 시간</p>
-                        </div>
-                        <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-4">
-                            <p className="text-2xl font-black text-red-600 dark:text-red-400">{mistakes}</p>
+                        <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl">
+                            <p className="text-2xl font-bold text-red-500">{mistakes}</p>
                             <p className="text-xs text-gray-500">실수</p>
+                        </div>
+                        <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl">
+                            <p className="text-2xl font-bold text-indigo-500">
+                                {startTime ? Math.floor((Date.now() - startTime) / 1000) : 0}s
+                            </p>
+                            <p className="text-xs text-gray-500">시간</p>
                         </div>
                     </div>
 
@@ -136,7 +105,7 @@ export function MatchingGame({ words, onBack }: MatchingGameProps) {
                         onClick={onBack}
                         className="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors"
                     >
-                        게임 목록으로
+                        목록으로
                     </button>
                 </div>
             </div>
@@ -144,67 +113,44 @@ export function MatchingGame({ words, onBack }: MatchingGameProps) {
     }
 
     return (
-        <div className="max-w-md mx-auto py-8 px-4 pb-40 lg:pb-12">
+        <div className="flex flex-col h-full max-w-4xl mx-auto px-4 py-8">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <button onClick={onBack} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full">
+            <div className="flex-none flex items-center justify-between mb-8">
+                <button
+                    onClick={onBack}
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                >
                     <ArrowLeft className="w-6 h-6 text-gray-500" />
                 </button>
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1 text-gray-500">
-                        <Clock className="w-4 h-4" />
-                        <span className="font-bold text-sm">{formatTime(elapsedTime)}</span>
-                    </div>
-                    <div className="bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1 rounded-full">
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                            {matchedCount}/{totalPairs}
-                        </span>
+                    <div className="flex items-center gap-2 text-red-500 bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-full">
+                        <Zap className="w-4 h-4" />
+                        <span className="font-bold">{mistakes} Mistakes</span>
                     </div>
                 </div>
             </div>
 
-            {/* Game Area */}
-            <div className="grid grid-cols-2 gap-3">
-                {/* Words column */}
-                <div className="space-y-2">
-                    {wordItems.map((item) => (
+            {/* Grid Area - Flex & Scroll */}
+            <div className="flex-1 overflow-y-auto min-h-0 pb-20 custom-scrollbar">
+                <div className="grid grid-cols-4 gap-3 md:gap-4 h-full content-start">
+                    {items.map((item) => (
                         <button
                             key={item.id}
-                            onClick={() => handleSelect(item)}
+                            onClick={() => handleCardClick(item)}
                             disabled={item.isMatched}
                             className={cn(
-                                "w-full py-4 px-3 rounded-xl font-bold text-center transition-all duration-200 text-sm",
+                                "aspect-square rounded-2xl p-2 md:p-4 flex items-center justify-center text-sm md:text-lg font-bold transition-all duration-300 shadow-sm border-2",
                                 item.isMatched
-                                    ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
-                                    : selected?.id === item.id
-                                        ? "bg-indigo-600 text-white scale-105"
-                                        : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                    ? "opacity-0 cursor-default"
+                                    : "bg-white dark:bg-gray-900 hover:-translate-y-1 hover:shadow-md",
+                                selected?.id === item.id
+                                    ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 scale-105 z-10"
+                                    : "border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-300"
                             )}
                         >
-                            {item.text}
-                            {item.isMatched && <CheckCircle2 className="w-4 h-4 inline ml-1" />}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Meanings column */}
-                <div className="space-y-2">
-                    {meaningItems.map((item) => (
-                        <button
-                            key={item.id}
-                            onClick={() => handleSelect(item)}
-                            disabled={item.isMatched}
-                            className={cn(
-                                "w-full py-4 px-3 rounded-xl font-bold text-center transition-all duration-200 text-sm",
-                                item.isMatched
-                                    ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
-                                    : selected?.id === item.id
-                                        ? "bg-purple-600 text-white scale-105"
-                                        : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                            )}
-                        >
-                            {item.text}
-                            {item.isMatched && <CheckCircle2 className="w-4 h-4 inline ml-1" />}
+                            <span className="line-clamp-3 text-center break-keep">
+                                {item.content}
+                            </span>
                         </button>
                     ))}
                 </div>

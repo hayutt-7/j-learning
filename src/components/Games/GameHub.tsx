@@ -102,86 +102,88 @@ export function GameHub() {
 
     // Hub view
     return (
-        <div className="max-w-2xl mx-auto py-8 px-4 pb-40 lg:pb-12">
-            <div className="text-center mb-10">
-                <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                    <Star className="w-8 h-8 text-white" />
-                </div>
-                <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2">단어 게임</h1>
-                <p className="text-gray-500 dark:text-gray-400">
-                    나만의 단어장으로 재미있게 학습하세요!
-                </p>
-            </div>
-
-            {/* Word count info */}
-            <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl p-4 mb-8 flex items-center justify-between">
-                <div>
-                    <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400">나만의 단어장</p>
-                    <p className="text-xs text-indigo-500 dark:text-indigo-300">
-                        {wordCount > 0 ? `${wordCount}개 단어로 게임 가능` : '단어를 먼저 저장하세요'}
+        <div className="flex flex-col h-full max-w-2xl mx-auto px-4 py-8">
+            <div className="flex-1 overflow-y-auto min-h-0 pb-20 px-1 custom-scrollbar">
+                <div className="text-center mb-10">
+                    <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <Star className="w-8 h-8 text-white" />
+                    </div>
+                    <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2">단어 게임</h1>
+                    <p className="text-gray-500 dark:text-gray-400">
+                        나만의 단어장으로 재미있게 학습하세요!
                     </p>
                 </div>
-                <div className="text-3xl font-black text-indigo-600 dark:text-indigo-400">
-                    {wordCount}
+
+                {/* Word count info */}
+                <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl p-4 mb-8 flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400">나만의 단어장</p>
+                        <p className="text-xs text-indigo-500 dark:text-indigo-300">
+                            {wordCount > 0 ? `${wordCount}개 단어로 게임 가능` : '단어를 먼저 저장하세요'}
+                        </p>
+                    </div>
+                    <div className="text-3xl font-black text-indigo-600 dark:text-indigo-400">
+                        {wordCount}
+                    </div>
                 </div>
-            </div>
 
-            {/* Games grid */}
-            <div className="grid grid-cols-2 gap-4">
-                {GAMES.map((game) => {
-                    const isLocked = wordCount < game.minWords;
-                    const Icon = game.icon;
+                {/* Games grid */}
+                <div className="grid grid-cols-2 gap-4">
+                    {GAMES.map((game) => {
+                        const isLocked = wordCount < game.minWords;
+                        const Icon = game.icon;
 
-                    return (
-                        <button
-                            key={game.id}
-                            onClick={() => handleGameSelect(game)}
-                            disabled={isLocked}
-                            className={cn(
-                                "relative p-6 rounded-2xl text-left transition-all duration-200 group",
-                                isLocked
-                                    ? "bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed"
-                                    : "bg-white dark:bg-gray-800 hover:shadow-xl hover:scale-[1.02] border border-gray-100 dark:border-gray-700"
-                            )}
-                        >
-                            {/* Icon */}
-                            <div className={cn(
-                                "w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-gradient-to-br",
-                                isLocked ? "from-gray-400 to-gray-500" : game.color
-                            )}>
-                                {isLocked ? (
-                                    <Lock className="w-6 h-6 text-white" />
-                                ) : (
-                                    <Icon className="w-6 h-6 text-white" />
+                        return (
+                            <button
+                                key={game.id}
+                                onClick={() => handleGameSelect(game)}
+                                disabled={isLocked}
+                                className={cn(
+                                    "relative p-6 rounded-2xl text-left transition-all duration-200 group",
+                                    isLocked
+                                        ? "bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed"
+                                        : "bg-white dark:bg-gray-800 hover:shadow-xl hover:scale-[1.02] border border-gray-100 dark:border-gray-700"
                                 )}
-                            </div>
-
-                            {/* Title & Description */}
-                            <h3 className="font-bold text-gray-900 dark:text-white mb-1">
-                                {game.title}
-                            </h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                                {isLocked ? `${game.minWords}개 이상 필요` : game.description}
-                            </p>
-
-                            {/* Lock badge */}
-                            {isLocked && (
-                                <div className="absolute top-3 right-3 px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded-full">
-                                    <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400">
-                                        잠김
-                                    </span>
+                            >
+                                {/* Icon */}
+                                <div className={cn(
+                                    "w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-gradient-to-br",
+                                    isLocked ? "from-gray-400 to-gray-500" : game.color
+                                )}>
+                                    {isLocked ? (
+                                        <Lock className="w-6 h-6 text-white" />
+                                    ) : (
+                                        <Icon className="w-6 h-6 text-white" />
+                                    )}
                                 </div>
-                            )}
-                        </button>
-                    );
-                })}
-            </div>
 
-            {/* Tip */}
-            <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-center">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                    💡 단어 암기에서 <span className="font-bold text-indigo-600 dark:text-indigo-400">별표 버튼</span>을 눌러 나만의 단어장에 추가하세요!
-                </p>
+                                {/* Title & Description */}
+                                <h3 className="font-bold text-gray-900 dark:text-white mb-1">
+                                    {game.title}
+                                </h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                                    {isLocked ? `${game.minWords}개 이상 필요` : game.description}
+                                </p>
+
+                                {/* Lock badge */}
+                                {isLocked && (
+                                    <div className="absolute top-3 right-3 px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded-full">
+                                        <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400">
+                                            잠김
+                                        </span>
+                                    </div>
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Tip */}
+                <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-center">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                        💡 단어 암기에서 <span className="font-bold text-indigo-600 dark:text-indigo-400">별표 버튼</span>을 눌러 나만의 단어장에 추가하세요!
+                    </p>
+                </div>
             </div>
         </div>
     );
