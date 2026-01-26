@@ -23,7 +23,7 @@ export function AnalysisCard({ item }: AnalysisCardProps) {
             className={cn(
                 "relative overflow-hidden rounded-2xl border transition-all duration-300 group", // Rounded-2xl
                 mastered
-                    ? "bg-gray-50/80 dark:bg-gray-900/40 border-gray-100 dark:border-gray-800"
+                    ? "bg-slate-50 dark:bg-slate-900/60 border-indigo-100 dark:border-indigo-900/50" // Mastered: Subtle background, no opacity drop
                     : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-lg dark:hover:shadow-none hover:-translate-y-0.5" // Lift effect
             )}
         >
@@ -109,7 +109,7 @@ export function AnalysisCard({ item }: AnalysisCardProps) {
             {/* Content */}
             <div className={cn(
                 "px-5 pb-5 transition-opacity duration-300",
-                mastered ? "opacity-40" : "opacity-100"
+                mastered ? "opacity-80 grayscale-[10%]" : "opacity-100" // Slight visual dampening but readable
             )}>
                 <p className="text-gray-700 dark:text-gray-300 leading-7 text-[15px]"> {/* Increased readability */}
                     {item.explanation}
