@@ -92,42 +92,29 @@ ${userLyrics}
         }
 
         // 3. Search for song by artist/title
-        const prompt = `You are a Japanese music expert. A user is looking for the song:
+        const prompt = `You are a Japanese music expert. A user is looking for the lyrics of:
 Artist: ${artist || '(not specified)'}
 Title: ${title || '(not specified)'}
 
-Your task:
-1. Try to identify this song. If you recognize it, use actual famous lyrics lines from the song.
-2. Generate 8-10 Japanese sentences that are ACTUAL famous lyrics or similar-sounding lines from this song or this artist's style. 
-   **CRITIVE: Each sentence must be SHORT (1-2 lines of lyrics max). Do NOT combine multiple verses into one string.**
-3. Extract 10-15 key vocabulary words and grammar patterns with Korean meanings.
+Your task is to provide the **ACTUAL JAPANESE LYRICS** for this song.
+If you know the song, output the full lyrics (or at least the main parts like Verse 1 + Chorus).
+If you don't know the exact song, generate a realistic J-Pop song lyrics in the style of this artist.
 
-IMPORTANT: The sentences MUST be realistic Japanese lyrics. Do NOT leave the array empty.
+**CRITICAL**: Return the lyrics as a list of strings in the 'sentences' array. 
+The lyrics should be in natural Japanese (Kanji/Hiragana).
 
 Respond in this exact JSON format:
 {
     "confirmed": true,
-    "title": "노래 제목 (Japanese)",
-    "artist": "가수명",
+    "title": "Song Title",
+    "artist": "Artist Name",
     "sentences": [
-        "夜に駆ける (example lyric line 1)",
-        "僕らは夜を駆け抜けて (example lyric line 2)"
+        "First line of lyrics...",
+        "Second line of lyrics..."
     ],
-    "vocabItems": [
-        {
-            "id": "song_v1",
-            "text": "駆ける",
-            "reading": "かける",
-            "meaning": "달리다, 내달리다",
-            "type": "vocab",
-            "jlpt": "N2",
-            "example": "夜に駆ける (밤을 내달리다)",
-            "explanation": ""
-        }
-    ]
+    "vocabItems": [] 
 }
-
-Even if you cannot identify the exact song, ALWAYS provide at least 5 sentences and 8 vocab items based on similar Japanese pop songs.`;
+`;
 
         const result = await model.generateContent(prompt);
         const content = result.response.text();

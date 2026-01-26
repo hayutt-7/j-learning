@@ -15,6 +15,48 @@ export function ContentStudy() {
     const [content, setContent] = useState('');
     const [error, setError] = useState('');
 
+    // Search Mode State
+    const [mode, setMode] = useState<'DIRECT' | 'SEARCH'>('DIRECT');
+    const [searchArtist, setSearchArtist] = useState('');
+    const [searchTitle, setSearchTitle] = useState('');
+    const [isSearching, setIsSearching] = useState(false);
+
+    const handleSongSearch = async () => {
+        if (!searchArtist.trim() || !searchTitle.trim()) {
+            setError('가수와 제목을 모두 입력해주세요.');
+            return;
+        }
+
+        setIsSearching(true);
+        setError('');
+
+        try {
+            const res = await fetch('/api/song', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ artist: searchArtist, title: searchTitle }),
+            });
+
+            if (!res.ok) throw new Error('Search failed');
+
+            const data = await res.json();
+            if (data.sentences && data.sentences.length > 0) {
+                // Formatting lyrics
+                const lyrics = data.sentences.join('\n');
+                setContent(lyrics);
+                setTitle(`${data.artist} - ${data.title}`);
+                setMode('DIRECT'); // Switch back to edit mode
+            } else {
+                setError('가사를 찾을 수 없습니다.');
+            }
+        } catch (err) {
+            console.error(err);
+            setError('검색 중 오류가 발생했습니다.');
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
     const handleAnalyze = async () => {
         if (!content.trim()) {
             setError('내용을 입력해주세요.');
@@ -113,30 +155,108 @@ export function ContentStudy() {
 
                 <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 border border-gray-100 dark:border-gray-800 shadow-xl shadow-gray-200/50 dark:shadow-none">
                     <div className="space-y-6">
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                                제목 (선택)
-                            </label>
-                            <input
-                                type="text"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                placeholder="예: 요아소비 - 아이돌"
-                                className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:border-indigo-500 focus:outline-none transition-colors"
-                            />
+                        {/* Mode Tabs */}
+                        <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl mb-6">
+                            <button
+                                onClick={() => setMode('DIRECT')}
+                                className={cn(
+                                    "flex-1 py-2 rounded-lg text-sm font-bold transition-all",
+                                    mode === 'DIRECT'
+                                        ? "bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                                        : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                                )}
+                            >
+                                직접 입력
+                            </button>
+                            <button
+                                onClick={() => setMode('SEARCH')}
+                                className={cn(
+                                    "flex-1 py-2 rounded-lg text-sm font-bold transition-all",
+                                    mode === 'SEARCH'
+                                        ? "bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                                        : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                                )}
+                            >
+                                노래 검색 (AI)
+                            </button>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                                일본어 텍스트 <span className="text-red-500">*</span>
-                            </label>
-                            <textarea
-                                value={content}
-                                onChange={(e) => setContent(e.target.value)}
-                                placeholder="일본어 가사나 문장을 붙여넣으세요. (한국어 번역이나 발음이 섞여 있어도 AI가 일본어만 분석합니다!)"
-                                className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:border-indigo-500 focus:outline-none transition-colors h-64 resize-none text-base leading-relaxed"
-                            />
-                        </div>
+                        {mode === 'SEARCH' ? (
+                            <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                                        가수 이름
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={searchArtist}
+                                        onChange={(e) => setSearchArtist(e.target.value)}
+                                        placeholder="예: YOASOBI, 요네즈 켄시"
+                                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:border-indigo-500 focus:outline-none transition-colors"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                                        노래 제목
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={searchTitle}
+                                        onChange={(e) => setSearchTitle(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleSongSearch()}
+                                        placeholder="예: IDOL, Lemon"
+                                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:border-indigo-500 focus:outline-none transition-colors"
+                                    />
+                                </div>
+                                <button
+                                    onClick={handleSongSearch}
+                                    disabled={isSearching || !searchArtist.trim() || !searchTitle.trim()}
+                                    className="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-200 dark:shadow-none mt-4"
+                                >
+                                    {isSearching ? (
+                                        <>
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                            가사 찾는 중...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Search className="w-5 h-5" />
+                                            가사 불러오기
+                                        </>
+                                    )}
+                                </button>
+                                <p className="text-xs text-center text-gray-400 mt-2">
+                                    AI가 가사를 자동으로 찾아 입력창에 채워줍니다.
+                                </p>
+                            </div>
+                        ) : (
+                            <>
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                                        제목 (선택)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        placeholder="예: 요아소비 - 아이돌"
+                                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:border-indigo-500 focus:outline-none transition-colors"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                                        일본어 텍스트 <span className="text-red-500">*</span>
+                                    </label>
+                                    <textarea
+                                        value={content}
+                                        onChange={(e) => setContent(e.target.value)}
+                                        placeholder="일본어 가사나 문장을 붙여넣으세요. (한국어 번역이나 발음이 섞여 있어도 AI가 일본어만 분석합니다!)"
+                                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:border-indigo-500 focus:outline-none transition-colors h-64 resize-none text-base leading-relaxed"
+                                    />
+                                </div>
+                            </>
+                        )}
 
                         {error && (
                             <div className="flex items-center gap-2 text-red-600 dark:text-red-400 text-sm font-medium bg-red-50 dark:bg-red-900/20 p-4 rounded-xl">
@@ -145,23 +265,26 @@ export function ContentStudy() {
                             </div>
                         )}
 
-                        <button
-                            onClick={handleAnalyze}
-                            disabled={isLoading || !content.trim()}
-                            className="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-200 dark:shadow-none text-lg"
-                        >
-                            {isLoading ? (
-                                <>
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                    분석 중입니다...
-                                </>
-                            ) : (
-                                <>
-                                    <CheckCircle2 className="w-5 h-5" />
-                                    분석 시작하기
-                                </>
-                            )}
-                        </button>
+
+                        {(mode === 'DIRECT' || content) && (
+                            <button
+                                onClick={handleAnalyze}
+                                disabled={isLoading || !content.trim()}
+                                className="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-200 dark:shadow-none text-lg mt-4"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        분석 중입니다...
+                                    </>
+                                ) : (
+                                    <>
+                                        <CheckCircle2 className="w-5 h-5" />
+                                        분석 시작하기
+                                    </>
+                                )}
+                            </button>
+                        )}
                     </div>
                 </div>
 
