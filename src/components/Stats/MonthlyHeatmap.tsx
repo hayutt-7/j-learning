@@ -25,7 +25,7 @@ export function MonthlyHeatmap({ data }: MonthlyHeatmapProps) {
     return (
         <div className="w-full space-y-4">
             {/* Heatmap Grid - 7 columns, wrap naturally */}
-            <div className="grid grid-cols-7 gap-1.5">
+            <div className="grid grid-cols-7 gap-1.5 max-w-sm mx-auto">
                 {/* Day headers */}
                 {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
                     <div key={day} className="text-center text-[10px] font-bold text-gray-400 pb-1">

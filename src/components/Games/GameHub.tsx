@@ -103,7 +103,7 @@ export function GameHub() {
     // Hub view
     return (
         <div className="flex flex-col h-full max-w-2xl mx-auto px-4 py-8">
-            <div className="flex-1 overflow-y-auto min-h-0 pb-20 px-1 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto min-h-0 pb-20 pl-1 pr-2 custom-scrollbar">
                 <div className="text-center mb-10">
                     <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                         <Star className="w-8 h-8 text-white" />

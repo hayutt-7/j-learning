@@ -224,7 +224,7 @@ export function VocabStudy() {
         return (
             <div className="flex flex-col h-full w-full max-w-4xl mx-auto px-4 py-8">
                 {/* Mode Tabs - Fixed at top */}
-                <div className="flex-none flex p-1 bg-gray-100 dark:bg-gray-800 rounded-xl mb-8">
+                <div className="flex-none inline-flex mx-auto p-1 bg-gray-100 dark:bg-gray-800 rounded-xl mb-8">
                     <button
                         onClick={() => setActiveTab('VOCAB')}
                         className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'VOCAB'
