@@ -5,7 +5,8 @@ import { JLPTLevel, LearningItem } from '@/lib/types';
 import { LevelSelector } from './LevelSelector';
 import { VocabCard } from './VocabCard';
 import { QuoteStudy } from './QuoteStudy'; // New Import
-import { ArrowLeft, ChevronLeft, ChevronRight, Trophy, X, Zap, BookX, Flame, Settings, Eye, EyeOff, Filter, Star, Download, Quote } from 'lucide-react';
+import { AnalysisList } from '@/components/Learning/AnalysisList';
+import { ArrowLeft, ChevronLeft, ChevronRight, Trophy, X, Zap, BookX, Flame, Settings, Eye, EyeOff, Filter, Star, Download, Quote, List } from 'lucide-react';
 import { useUserProgress, XP_TABLE } from '@/hooks/useUserProgress';
 import { useLearningHistory } from '@/hooks/useLearningHistory';
 import { useDailyGoals } from '@/hooks/useDailyGoals';
@@ -26,6 +27,7 @@ type StudyMode = 'VOCAB' | 'QUOTE';
 export function VocabStudy() {
     const [activeTab, setActiveTab] = useState<StudyMode>('VOCAB'); // Tab State
     const [level, setLevel] = useState<JLPTLevel | null>(null);
+    const [showList, setShowList] = useState(false); // New: List Management Mode
     const [cards, setCards] = useState<LearningItem[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [cardStatuses, setCardStatuses] = useState<Map<string, CardStatus>>(new Map());
@@ -220,6 +222,39 @@ export function VocabStudy() {
 
     const currentStatus = currentItem ? cardStatuses.get(currentItem.id) : undefined;
 
+
+    // List Management View
+    if (showList) {
+        const bookmarkedItems = getBookmarkedItems();
+        return (
+            <div className="flex flex-col h-full w-full max-w-4xl mx-auto px-4 py-8">
+                <div className="flex items-center justify-between mb-8">
+                    <button
+                        onClick={() => setShowList(false)}
+                        className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                        <span className="font-bold">돌아가기</span>
+                    </button>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">나만의 단어장 관리</h2>
+                    <div className="w-20"></div> {/* Spacer */}
+                </div>
+
+                <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar pb-20">
+                    {bookmarkedItems.length > 0 ? (
+                        <AnalysisList items={bookmarkedItems} />
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-20 text-center">
+                            <Star className="w-16 h-16 text-gray-200 dark:text-gray-700 mb-4" />
+                            <p className="text-gray-500 font-medium">저장된 단어가 없습니다.</p>
+                            <p className="text-sm text-gray-400 mt-2">학습 중에 ★ 버튼을 눌러 단어를 추가해보세요!</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
     if (!level) {
         return (
             <div className="flex flex-col h-full w-full max-w-4xl mx-auto px-4 py-8">
@@ -271,9 +306,16 @@ export function VocabStudy() {
                                         <p className="text-sm text-gray-600 dark:text-gray-300 text-center font-medium">
                                             북마크한 단어 집중 복습
                                         </p>
-                                        <div className="absolute top-4 right-4 bg-white/80 dark:bg-gray-900/80 px-3 py-1 rounded-full text-xs font-bold text-amber-600 dark:text-amber-400 backdrop-blur-sm">
-                                            Saved
-                                        </div>
+                                    </button>
+
+                                    {/* Manage List Button */}
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); setShowList(true); }}
+                                        className="absolute top-4 right-4 p-2 bg-white/90 dark:bg-gray-800/90 rounded-full text-gray-500 hover:text-indigo-600 hover:bg-white shadow-sm border border-transparent hover:border-indigo-200 transition-all flex items-center gap-1.5 px-3"
+                                        title="목록 관리"
+                                    >
+                                        <List className="w-4 h-4" />
+                                        <span className="text-xs font-bold">목록</span>
                                     </button>
 
                                     {/* Anki Export Button */}
