@@ -46,6 +46,7 @@ export interface AnalysisResult {
     tokens?: Token[]; // For rendering with furigana
     items: LearningItem[];
     isMock?: boolean;
+    error?: string;
 }
 
 export type LearningHistoryMap = Record<string, LearningHistoryItem>;

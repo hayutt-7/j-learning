@@ -138,6 +138,10 @@ export default function Home() {
       // 3. Get AI Response
       const data = await translateAndAnalyze(text);
 
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
       const newMessage: Message = {
         id: Date.now().toString(),
         userInput: text,

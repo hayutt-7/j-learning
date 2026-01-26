@@ -12,21 +12,12 @@ export async function translateAndAnalyze(text: string): Promise<AnalysisResult>
         return await analyzeJapaneseWithGemini(text);
     } catch (error: any) {
         console.error("Translation error:", error);
-        // Debugging: Throw the actual error to see it in the UI
-        throw new Error(`API Error: ${error.message || JSON.stringify(error)}`);
-
-        // Original Fallback Logic (Commented out for debugging)
-        /*
-        console.log("Falling back to Mock Data...");
-        try {
-            const { analyzeText } = await import('@/lib/mockAnalyzer');
-            const mockResult = await analyzeText(text);
-            return { ...mockResult, isMock: true };
-        } catch (mockError) {
-            console.error("Mock fallback failed:", mockError);
-            throw new Error("서비스를 사용할 수 없습니다.");
-        }
-        */
+        // Returning the error as data to bypass Next.js production error masking
+        return {
+            translatedText: "",
+            items: [],
+            error: `API Error: ${error.message || JSON.stringify(error)}`
+        };
     }
 }
 
