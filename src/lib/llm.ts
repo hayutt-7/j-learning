@@ -224,3 +224,53 @@ Response Format (JSON Array of Objects):
         throw new Error("Failed to analyze long text");
     }
 }
+
+export async function translateExampleWithGroq(japaneseText: string): Promise<{ korean: string; furigana: string }> {
+    if (!apiKey) {
+        throw new Error("GROQ_API_KEY is not set");
+    }
+
+    const prompt = `
+You are a Japanese-Korean translator.
+Translate the following Japanese text to natural Korean.
+Also provide the reading (furigana) for the entire Japanese sentence in Hiragana.
+
+Input Japanese: "${japaneseText}"
+
+Response Format (JSON only):
+{
+  "korean": "한국어 번역 결과",
+  "furigana": "전체 문장을 히라가나로 변환한 결과"
+}
+`;
+
+    try {
+        const completion = await groq.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            messages: [
+                {
+                    role: "user",
+                    content: prompt,
+                },
+            ],
+            temperature: 0.3, // Lower temperature for more deterministic translation
+            max_tokens: 512,
+            response_format: { type: "json_object" },
+        });
+
+        const responseText = completion.choices[0]?.message?.content || "";
+        if (!responseText) throw new Error("Empty response");
+
+        const data = JSON.parse(responseText);
+        return {
+            korean: data.korean || "번역 실패",
+            furigana: data.furigana || japaneseText
+        };
+    } catch (error) {
+        console.error("Example Translation Error:", error);
+        return {
+            korean: "번역을 불러올 수 없습니다.",
+            furigana: japaneseText
+        };
+    }
+}

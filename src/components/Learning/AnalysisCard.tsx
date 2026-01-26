@@ -1,12 +1,11 @@
-'use client';
-
-import { Check, BookOpen, ALargeSmall, Star } from 'lucide-react';
+import { Check, BookOpen, ALargeSmall, Star, Volume2 } from 'lucide-react';
 import { LearningItem } from '@/lib/types';
 import { useLearningHistory } from '@/hooks/useLearningHistory';
 import { cn } from '@/lib/utils';
 import { translatePitchAccent } from '@/lib/pitch-accent';
 import { useState } from 'react';
 import { ExampleWithTooltip } from './ExampleWithTooltip';
+import { playAudio } from '@/lib/audio-utils';
 
 interface AnalysisCardProps {
     item: LearningItem;
@@ -42,7 +41,7 @@ export function AnalysisCard({ item }: AnalysisCardProps) {
                     </div>
                     <div className="space-y-1.5 flex-1">
                         <div className="flex items-center flex-wrap gap-2">
-                            <h3 className="font-bold text-gray-900 dark:text-gray-50 text-xl leading-tight tracking-tight"> {/* Better typography */}
+                            <h3 className="font-bold text-gray-900 dark:text-gray-50 text-xl leading-tight tracking-tight flex items-center gap-3"> {/* Better typography */}
                                 {item.reading ? (
                                     <ruby className="flex flex-col-reverse justify-center gap-0.5">
                                         <span>{item.text}</span>
@@ -51,6 +50,16 @@ export function AnalysisCard({ item }: AnalysisCardProps) {
                                 ) : (
                                     item.text
                                 )}
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        playAudio(item.text);
+                                    }}
+                                    className="p-1.5 rounded-full text-gray-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all flex-shrink-0"
+                                    title="발음 듣기"
+                                >
+                                    <Volume2 className="w-4 h-4" />
+                                </button>
                             </h3>
 
                             {/* Badges */}

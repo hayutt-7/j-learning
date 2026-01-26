@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { analyzeJapaneseWithGroq } from '@/lib/llm';
+import { analyzeJapaneseWithGroq, translateExampleWithGroq } from '@/lib/llm';
 
 export const runtime = 'edge';
 
@@ -14,18 +14,12 @@ export async function POST(req: Request) {
             );
         }
 
-        // Reuse the existing analysis function but just extract translation/reading
-        // This is efficient because we already have the prompt tuned
-        const analysis = await analyzeJapaneseWithGroq(text);
-
-        // Extract furigana from tokens
-        const furigana = (analysis.tokens || [])
-            .map(t => t.reading || t.text) // Use reading if available (hiragana), otherwise text
-            .join('');
+        // Use the dedicated function for example translation
+        const { korean, furigana } = await translateExampleWithGroq(text);
 
         return NextResponse.json({
-            korean: analysis.translatedText,
-            furigana: furigana
+            korean,
+            furigana
         });
 
     } catch (error) {
