@@ -112,70 +112,91 @@ export function QuoteStudy() {
 
                 {/* Quote Display */}
                 {!isLoading && quoteData && (
-                    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        {/* Main Quote Card */}
-                        <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden group min-h-[300px] flex flex-col justify-center items-center">
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
-                            <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full translate-y-1/3 -translate-x-1/3 blur-xl"></div>
+                    <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        {/* Main Quote Paper/Card */}
+                        <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 md:p-12 border border-gray-100 dark:border-gray-800 shadow-2xl shadow-gray-100/50 dark:shadow-none relative overflow-hidden">
+                            {/* Decorative Elements */}
+                            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-80"></div>
+                            <Quote className="absolute top-8 left-8 w-12 h-12 text-gray-100 dark:text-gray-800 rotate-180" />
+                            <Quote className="absolute bottom-8 right-8 w-12 h-12 text-gray-100 dark:text-gray-800" />
 
-                            <div className="relative z-10 text-center w-full max-w-3xl">
-                                <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold mb-8 border border-white/20">
-                                    {THEMES.find(t => t.id === currentTheme)?.label || 'Random'} Quote
+                            <div className="relative z-10 flex flex-col items-center text-center">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-50 dark:bg-gray-800 text-xs font-bold text-gray-500 dark:text-gray-400 mb-10 tracking-wider uppercase border border-gray-100 dark:border-gray-700">
+                                    {THEMES.find(t => t.id === currentTheme)?.icon}
+                                    {THEMES.find(t => t.id === currentTheme)?.label || 'Random'}
                                 </span>
 
-                                {/* Main Japanese Text with Ruby (Furigana) */}
-                                <div className="mb-8 flex flex-wrap justify-center gap-x-2 gap-y-4 leading-relaxed">
-                                    {quoteData.tokens && quoteData.tokens.length > 0 ? (
-                                        quoteData.tokens.map((token, idx) => (
-                                            <ruby key={idx} className="flex flex-col-reverse items-center">
-                                                <span className="text-3xl md:text-5xl font-black tracking-wide font-serif">{token.text}</span>
-                                                <rt className="text-sm md:text-base font-medium text-indigo-200 mb-1 select-none">{token.reading}</rt>
-                                            </ruby>
-                                        ))
-                                    ) : (
-                                        <h1 className="text-3xl md:text-4xl font-black tracking-wide font-serif">
-                                            {quoteData.items && quoteData.items[0]?.text}
-                                        </h1>
-                                    )}
+                                {/* Main Japanese Text */}
+                                <div className="mb-10 w-full">
+                                    <div className="flex flex-wrap justify-center gap-x-4 gap-y-6 leading-relaxed">
+                                        {quoteData.tokens && quoteData.tokens.length > 0 ? (
+                                            quoteData.tokens.map((token, idx) => (
+                                                <ruby key={idx} className="flex flex-col-reverse items-center group cursor-pointer transition-transform hover:scale-105"
+                                                    onClick={() => playAudio(token.text)}
+                                                    title="Click to listen"
+                                                >
+                                                    <span className="text-4xl md:text-6xl font-black tracking-wider font-serif text-gray-900 dark:text-white decoration-indigo-200/50 dark:decoration-indigo-900/50 underline-offset-8 group-hover:underline transition-all">
+                                                        {token.text}
+                                                    </span>
+                                                    <rt className="text-sm md:text-lg font-medium text-indigo-500 dark:text-indigo-400 mb-2 select-none opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        {token.reading}
+                                                    </rt>
+                                                </ruby>
+                                            ))
+                                        ) : (
+                                            <h1 className="text-4xl md:text-5xl font-black tracking-wide font-serif text-gray-900 dark:text-white">
+                                                {quoteData.items && quoteData.items[0]?.text}
+                                            </h1>
+                                        )}
+                                    </div>
                                 </div>
 
+                                {/* Divider */}
+                                <div className="w-16 h-1 bg-indigo-500 rounded-full mb-10 opacity-20"></div>
+
                                 {/* Translation */}
-                                <p className="text-lg md:text-xl text-indigo-100 font-medium mb-10 leading-relaxed bg-black/10 p-4 rounded-xl inline-block max-w-2xl mx-auto">
+                                <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 font-medium mb-12 leading-relaxed italic max-w-2xl">
                                     "{quoteData.translatedText}"
                                 </p>
 
                                 {/* Actions */}
-                                <div className="flex justify-center gap-4">
+                                <div className="flex flex-wrap justify-center gap-4 w-full">
                                     <button
                                         onClick={() => {
                                             // Play full Japanese text
                                             const text = quoteData.items?.[0]?.text || "";
                                             if (text) playAudio(text);
                                         }}
-                                        className="flex items-center gap-2 px-6 py-3 bg-white text-indigo-600 rounded-xl font-bold shadow-lg hover:scale-105 active:scale-95 transition-all text-sm md:text-base"
+                                        className="flex-1 max-w-[200px] flex items-center justify-center gap-2 px-6 py-4 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white rounded-2xl font-bold hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all border border-transparent hover:border-indigo-100 dark:hover:border-indigo-800"
                                     >
                                         <Volume2 className="w-5 h-5" />
-                                        일본어 듣기
+                                        전체 듣기
                                     </button>
                                     <button
                                         onClick={() => generateQuote(currentTheme)}
-                                        className="flex items-center gap-2 px-6 py-3 bg-indigo-700/50 hover:bg-indigo-700 text-white rounded-xl font-bold backdrop-blur-sm transition-all border border-indigo-400/30 text-sm md:text-base"
+                                        className="flex-1 max-w-[200px] flex items-center justify-center gap-2 px-6 py-4 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200 dark:shadow-none hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 transition-all"
                                     >
                                         <RefreshCw className="w-5 h-5" />
-                                        다른 명언
+                                        다음 명언
                                     </button>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Analysis Section */}
-                        <div className="pb-10">
-                            <div className="flex items-center gap-2 mb-4 px-2">
-                                <Sparkles className="w-5 h-5 text-indigo-500" />
-                                <h3 className="font-bold text-gray-700 dark:text-gray-300">상세 분석 & 단어 학습</h3>
+                        {/* Analysis Section Divider */}
+                        <div className="relative py-4">
+                            <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                                <div className="w-full border-t border-gray-100 dark:border-gray-800"></div>
                             </div>
+                            <div className="relative flex justify-center">
+                                <span className="bg-[#FAFAFA] dark:bg-[#030712] px-4 text-sm font-bold text-gray-400 uppercase tracking-widest">
+                                    Analysis
+                                </span>
+                            </div>
+                        </div>
 
-                            {/* Use AnalysisList for vocabulary breakdown */}
+                        {/* Detailed Analysis */}
+                        <div className="space-y-4 pb-10">
                             {quoteData.items && (
                                 <AnalysisList items={quoteData.items} />
                             )}
