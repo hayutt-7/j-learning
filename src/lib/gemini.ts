@@ -71,6 +71,10 @@ Response Format (JSON only):
       throw new Error("Invalid response from Gemini: Missing translatedText");
     }
 
+    // Defensive coding: Ensure arrays exist
+    data.items = data.items || [];
+    data.tokens = data.tokens || [];
+
     return data;
   } catch (error) {
     console.error("Gemini Analysis Error:", error);
