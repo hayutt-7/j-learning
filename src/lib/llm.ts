@@ -295,8 +295,8 @@ Response Format (JSON only):
 {
   "translatedText": "한국어 해석 (Korean translation)",
   "tokens": [
-    { "text": "七", "reading": "なな", "romaji": "nana" },
-    { "text": "転", "reading": "ころ", "romaji": "kori" }
+    { "text": "七", "reading": "なな" },
+    { "text": "転", "reading": "ころ" }
   ],
   "items": [
     {
@@ -304,7 +304,7 @@ Response Format (JSON only):
       "text": "七転び八起き (The full Japanese Quote)", 
       "type": "quote",
       "meaning": "칠전팔기 (Korean Meaning)",
-      "reading": "ななころびやおき (Full Hiragana Reading)",
+      "reading": "ななころびやおき (Full Hiragana Reading ONLY)",
       "explanation": "이 명언의 유래나 의미에 대한 한국어 설명...",
       "nuance": "${theme}",
       "jlpt": "N/A",
@@ -315,11 +315,17 @@ Response Format (JSON only):
       "text": "転ぶ (Japanese Word)",
       "type": "vocab",
       "meaning": "넘어지다 (Korean Meaning)",
-      "reading": "ころぶ",
+      "reading": "ころぶ (Hiragana ONLY)",
       "explanation": "단어 설명...",
       "examples": ["道で転んだ。"]
     }
   ]
+}
+
+IMPORTANT RULES:
+1. "reading" field MUST BE HIRAGANA ONLY. No Kanji, No Katakana.
+2. If the word is Katakana (e.g. news), "reading" can be empty or the Katakana itself, but prefer Hiragana for pronunciation guide.
+3. Split tokens finely so each Kanji has its reading.
 }
 `;
 
