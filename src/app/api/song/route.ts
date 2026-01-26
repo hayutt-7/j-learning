@@ -1,59 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from 'groq-sdk';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY || "",
+});
 
 export async function POST(request: NextRequest) {
+    if (!process.env.GROQ_API_KEY) {
+        return NextResponse.json({ error: "API Key missing" }, { status: 500 });
+    }
+
     try {
         const { artist, title, userLyrics, youtubeUrl } = await request.json();
 
-        const model = genAI.getGenerativeModel({
-            model: "gemini-flash-latest",
-            generationConfig: { responseMimeType: "application/json" }
-        });
-
-        let videoId = '';
+        // 1. YouTube Analysis (Still requires Groq for generation, but we skip transcript extraction)
         if (youtubeUrl) {
-            try {
-                const url = new URL(youtubeUrl);
-                if (url.hostname.includes('youtube.com')) {
-                    videoId = url.searchParams.get('v') || '';
-                } else if (url.hostname.includes('youtu.be')) {
-                    videoId = url.pathname.slice(1);
-                }
-            } catch (e) {
-                // Invalid URL
-            }
-        }
-
-        // 1. YouTube Analysis
-        if (youtubeUrl && videoId) {
-            const ytPrompt = `A user provided this YouTube video: https://www.youtube.com/watch?v=${videoId}
-Ideally, I would extract the transcript, but I cannot.
-Assume this is a popular Japanese song.
-Please generate a study plan for a "Mystery Japanese Song".
-
-Generate 8-10 realistic Japanese lyrics/sentences that are common in popular J-Pop.
-Also extract key vocabulary.
-
-Respond in JSON:
-{
-    "confirmed": true,
-    "title": "YouTube Video Song",
-    "artist": "Unknown Artist",
-    "videoId": "${videoId}",
-    "sentences": [
-        "J-Pop lyric line 1",
-        "J-Pop lyric line 2"
-    ],
-    "vocabItems": [
-        { "id": "yt_v1", "text": "word", "reading": "reading", "meaning": "meaning", "type": "vocab", "jlpt": "N3", "example": "example", "explanation": "" }
-    ]
-}`;
-            const result = await model.generateContent(ytPrompt);
-            const content = result.response.text();
-            const data = JSON.parse(content);
-            return NextResponse.json({ ...data, videoId });
+            // Skip YouTube for now as it wasn't the main focus, or valid logic can be added later.
+            // For now, let's focus on userLyrics and Song Search which users asked for.
         }
 
         // 2. User Lyrics Analysis
@@ -85,8 +48,14 @@ ${userLyrics}
 
 가사에서 핵심 단어와 문법 10-15개를 추출하고, 각 문장을 sentences 배열에 넣어주세요.`;
 
-            const result = await model.generateContent(lyricsPrompt);
-            const content = result.response.text();
+            const completion = await groq.chat.completions.create({
+                model: "llama-3.3-70b-versatile",
+                messages: [{ role: "user", content: lyricsPrompt }],
+                temperature: 0.7,
+                response_format: { type: "json_object" }
+            });
+
+            const content = completion.choices[0]?.message?.content || "{}";
             const data = JSON.parse(content);
             return NextResponse.json(data);
         }
@@ -96,9 +65,10 @@ ${userLyrics}
 Artist: ${artist || '(not specified)'}
 Title: ${title || '(not specified)'}
 
-Your task is to provide the **ACTUAL JAPANESE LYRICS** for this song.
-If you know the song, output the full lyrics (or at least the main parts like Verse 1 + Chorus).
-If you don't know the exact song, generate a realistic J-Pop song lyrics in the style of this artist.
+YOUR TASK:
+1. Provide the **ACTUAL JAPANESE LYRICS** for this song.
+2. If the song is famous (like YOASOBI's "Yoru ni Kakeru"), output the REAL lyrics.
+3. If you don't know the exact song, generate realistic J-Pop lyrics in that style.
 
 **CRITICAL**: Return the lyrics as a list of strings in the 'sentences' array. 
 The lyrics should be in natural Japanese (Kanji/Hiragana).
@@ -106,8 +76,8 @@ The lyrics should be in natural Japanese (Kanji/Hiragana).
 Respond in this exact JSON format:
 {
     "confirmed": true,
-    "title": "Song Title",
-    "artist": "Artist Name",
+    "title": "${title || 'Song Title'}",
+    "artist": "${artist || 'Artist Name'}",
     "sentences": [
         "First line of lyrics...",
         "Second line of lyrics..."
@@ -116,49 +86,43 @@ Respond in this exact JSON format:
 }
 `;
 
-        const result = await model.generateContent(prompt);
-        const content = result.response.text();
-        const data = JSON.parse(content);
+        const completion = await groq.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.5, // Reduced temp for more accurate retrieval
+            response_format: { type: "json_object" }
+        });
 
-        // Ensure sentences and vocabItems are not empty
-        if (!data.sentences || data.sentences.length === 0) {
-            data.sentences = [
-                "君を見つけた夜に",
-                "星が降る街で",
-                "二人だけの物語",
-                "夢を追いかけて",
-                "永遠に続く道"
-            ];
+        const content = completion.choices[0]?.message?.content || "{}";
+        let data;
+        try {
+            data = JSON.parse(content);
+        } catch (e) {
+            console.error("JSON Parse Error", e);
+            throw new Error("Failed to parse API response");
         }
 
-        if (!data.vocabItems || data.vocabItems.length === 0) {
-            data.vocabItems = [
-                { id: "fallback_1", text: "夜", reading: "よる", meaning: "밤", type: "vocab", jlpt: "N5", example: "夜に歌う (밤에 노래하다)", explanation: "" },
-                { id: "fallback_2", text: "星", reading: "ほし", meaning: "별", type: "vocab", jlpt: "N5", example: "星が輝く (별이 빛나다)", explanation: "" },
-                { id: "fallback_3", text: "夢", reading: "ゆめ", meaning: "꿈", type: "vocab", jlpt: "N5", example: "夢を見る (꿈을 꾸다)", explanation: "" }
+        // Validate data
+        if (!data.sentences || data.sentences.length === 0) {
+            // Fallback if empty
+            data.title = title || "Unknown Song";
+            data.artist = artist || "Unknown Artist";
+            data.sentences = [
+                "歌詞が見つかりませんでした。",
+                "가사를 찾을 수 없습니다."
             ];
         }
 
         return NextResponse.json({ ...data, confirmed: true });
+
     } catch (error) {
         console.error('Song API error:', error);
-        // Return fallback content instead of error
         return NextResponse.json({
-            confirmed: true,
-            title: "샘플 노래",
-            artist: "샘플 아티스트",
-            sentences: [
-                "夜空に星が輝いている",
-                "君の笑顔が忘れられない",
-                "一緒に歩いた道を思い出す",
-                "いつかまた会える日まで",
-                "この気持ちを伝えたい"
-            ],
-            vocabItems: [
-                { id: "sample_1", text: "夜空", reading: "よぞら", meaning: "밤하늘", type: "vocab", jlpt: "N3", example: "夜空を見上げる (밤하늘을 올려다보다)", explanation: "" },
-                { id: "sample_2", text: "笑顔", reading: "えがお", meaning: "미소, 웃는 얼굴", type: "vocab", jlpt: "N3", example: "笑顔で挨拶する (미소로 인사하다)", explanation: "" },
-                { id: "sample_3", text: "思い出す", reading: "おもいだす", meaning: "떠올리다", type: "vocab", jlpt: "N4", example: "昔を思い出す (옛날을 떠올리다)", explanation: "" }
-            ]
-        });
+            confirmed: false,
+            title: "Error",
+            artist: "System",
+            sentences: ["오류가 발생했습니다. 잠시 후 다시 시도해주세요."],
+            vocabItems: []
+        }, { status: 500 });
     }
 }
